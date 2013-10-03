@@ -6,6 +6,10 @@
 	"private": true,
 	"description": "A second attempt to make a node library for opening HWP documents",
 	"main": "./lib/hwp.js",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/123jimin/node-hwp.git"
+	},
 	"dependencies": {
 		"async": "~0.2.9",
 		"ole-doc": "*"
