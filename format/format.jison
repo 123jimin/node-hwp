@@ -189,14 +189,16 @@
 
 "{{"([^\}]|"}"[^\}])+"}}"	return "SCRIPT";
 
-\t\t	return "TWO_TABS";
-\t	return "TAB";
 "## "([^\n]+)	/* skip file comments */;
 "# "([^\n]+)	return "COMMENT";
 
-(" "|\r|\n)+ /* skip whitespaces */
+(" "|\r|\n|\t)+ /* skip whitespaces */
 
 \"([^\"]+)\"	return "QUOTED_STRING";
+
+"{"	return "P_OPEN";
+"}"	return "P_CLOSE";
+";"	return "LINE_END";
 
 "String"	return "String";
 "Int"	return "Int";
@@ -290,12 +292,13 @@ element
 	;
 
 def_enum
-	: ENUM TOKEN {$$ = null;}
+	: ENUM TOKEN P_OPEN P_CLOSE {$$ = null;}
 	;
 
 def_node
-	: NODE TOKEN {$$ = new node.Node($2, []);}
-	| NODE TOKEN def_node_inner {$$ = new node.Node($2, $3);}
+	: NODE TOKEN LINE_END {$$ = new node.Node($2, []);}
+	| NODE TOKEN P_OPEN P_CLOSE {$$ = new node.Node($2, []);}
+	| NODE TOKEN P_OPEN def_node_inner P_CLOSE {$$ = new node.Node($2, $4);}
 	;
 
 def_node_inner
@@ -304,8 +307,8 @@ def_node_inner
 	;
 
 def_node_element
-	: TAB type_node TOKEN {$$ = new node.NodeType($2, $3, []);}
-	| TAB type_node TOKEN def_node_element_options {$$ = new node.NodeType($2, $3, $4);}
+	: type_node TOKEN LINE_END {$$ = new node.NodeType($1, $2, []);}
+	| type_node TOKEN def_node_element_options LINE_END {$$ = new node.NodeType($1, $2, $3);}
 	;
 
 def_node_element_options
@@ -319,16 +322,17 @@ def_node_element_option
 	;
 
 def_tag
-	: TAG TOKEN INTEGER	{$$ = new node.Tag($2, $3);}
+	: TAG TOKEN INTEGER	LINE_END {$$ = new node.Tag($2, $3);}
 	;
 
 def_tago
-	: TAG_OFFSET TOKEN INTEGER TOKEN {$$ = new node.TagOffset($4, $2, $3);}
+	: TAG_OFFSET TOKEN INTEGER TOKEN LINE_END {$$ = new node.TagOffset($4, $2, $3);}
 	;
 
 def_record
-	: RECORD TOKEN {$$ = new node.Record($2, []);}
-	| RECORD TOKEN def_record_inner	{$$ = new node.Record($2, $3);}
+	: RECORD TOKEN LINE_END {$$ = new node.Record($2, []);}
+	| RECORD TOKEN P_OPEN P_CLOSE {$$ = new node.Record($2, []);}
+	| RECORD TOKEN P_OPEN def_record_inner P_CLOSE	{$$ = new node.Record($2, $4);}
 	;
 
 def_record_inner
@@ -337,34 +341,26 @@ def_record_inner
 	;
 
 def_record_element
-	: TAB def_record_simpletype {$$ = $2;}
-	| TAB def_record_group {$$ = $2;}
-	| TAB def_record_array {$$ = $2;}
-	| TAB def_record_bytestream {$$ = $2;}
+	: def_record_simpletype {$$ = $1;}
+	| def_record_group {$$ = $1;}
+	| def_record_array {$$ = $1;}
+	| def_record_bytestream {$$ = $1;}
 	;
 
 def_record_simpletype
-	: type_record TOKEN {$$ = new node.SimpleType($1, $2);}
+	: type_record TOKEN LINE_END {$$ = new node.SimpleType($1, $2);}
 	| SCRIPT {$$ = new node.Script($1.slice(2,-2));}
 	;
 
 def_record_group
-	: Group TOKEN def_record_group_inner {$$ = new node.Group($2, $3);}
-	;
-
-def_record_group_inner
-	: def_record_group_element def_record_group_inner {$$ = [$1].concat($2);}
-	| def_record_group_element {$$ = [$1];}
-	;
-
-def_record_group_element
-	: TWO_TABS def_record_simpletype {$$ = $2;}
+	: Group TOKEN P_OPEN def_record_inner P_CLOSE {$$ = new node.Group($2, $4);}
 	;
 
 def_record_array
-	: type_record_array_type TOKEN def_record_group_inner {$$ = new node.Array($3, $1, $2);}
+	: type_record_array_type TOKEN def_record_simpletype {$$ = new node.Array([$3], $1, $2);}
+	| type_record_array_type TOKEN P_OPEN def_record_inner P_CLOSE {$$ = new node.Array($4, $1, $2);}
 	;
 
 def_record_bytestream
-	: type_record_byptestream_type TOKEN {$$ = new node.ByteStream($1, $2);}
+	: type_record_bytestream_type TOKEN LINE_END {$$ = new node.ByteStream($1, $2);}
 	;
