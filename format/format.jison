@@ -232,7 +232,7 @@
 						c = offset.toObj()+' (function(){'+element.script.trim()+'\n\t}());';
 						return c;
 					}
-					return "// FIXME: unprocessed type";
+					return "// FIXME: unprocessed type ("+element.constructor.name+")";
 				}).map(function(s){return '\t'+s+'\n';}).join('');
 				code += "};";
 				return code;
