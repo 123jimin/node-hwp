@@ -5,5 +5,5 @@ var hwp_node_record_file = fs.readFileSync("./format/hwp-node-record.js", 'utf-8
 
 var code = format.parser.parse(hwp_format_file);
 code = hwp_node_record_file.replace('// CODE //', code);
-console.log(code);
+// console.log(code);
 fs.writeFileSync("./lib/hwpdata.js", code, 'utf-8');
