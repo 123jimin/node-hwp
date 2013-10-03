@@ -232,6 +232,11 @@
 						c = offset.toObj()+' (function(){'+element.script.trim()+'\n\t}());';
 						return c;
 					}
+					if(element instanceof node.ByteStream){
+						c = "this.attr."+element.name+" = this.data.slice("+offset.value+","+offset.plus(element.length)+");";
+						c += offset.add(element.length);
+						return c;
+					}
 					return "// FIXME: unprocessed type ("+element.constructor.name+")";
 				}).map(function(s){return '\t'+s+'\n';}).join('');
 				code += "};";
