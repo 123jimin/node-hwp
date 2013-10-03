@@ -205,3 +205,18 @@ record NUMBERING {}
 
 # 4.1.9 글머리표
 record BULLET {}
+
+# 4.1.10 문단 모양
+record PARA_SHAPE {
+	Bits:4 {
+		0~1 Int _SpaceType;
+		2~4 Int Align;
+		5~6 Int BreakLatinWord;
+		7 Int BreakNonLatinWord;
+		8 Boolean SnapToGrid;
+		9~15 Int Condense;
+		16 Boolean WidowOrphan;
+		17 Boolean KeepWithNext;
+		18 Boolean KeepLines;
+	}
+}

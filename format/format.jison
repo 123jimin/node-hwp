@@ -40,6 +40,12 @@
 		this.name = s;
 		this.type = t;
 	};
+	node.BitsType = function BitsType(sb, eb, t, s){
+		this.name = s;
+		this.type = t;
+		this.start = sb;
+		this.end = eb;
+	};
 	node.Group = function Group(s, a){
 		this.name = s;
 		this.values = a;
@@ -53,6 +59,11 @@
 		this.name = s;
 		this.length = l;
 		this.type = 'ByteStream';
+	};
+	node.Bits = function Bits(l, n, a){
+		this.name = n || '';
+		this.length = l;
+		this.values = a;
 	};
 	node.Script = function Script(s){
 		this.script = s;
@@ -134,6 +145,11 @@
 					var code = ' ';
 					code += this.value+'+='+v+';';
 					return code;
+				}, 'plus': function(i){
+					if(typeof this.value == 'number'){
+						return this.value+(+i);
+					}
+					return '('+this.value+'+'+i+')';
 				}, 'toObj': function(){
 					var code = "";
 					if(typeof this.value == 'number'){
@@ -164,6 +180,52 @@
 							return simpleTypeCode("this.attr."+element.name+"[tmp]", e, offset);
 						}).join('\n\t\t')+"\n";
 						c += "\t}";
+						return c;
+					}
+					if(element instanceof node.Bits){
+						var base = 'this.attr';
+						c = "";
+						if(element.name){
+							c += "this.attr."+element.name+" = {}; ";
+							base += '.'+element.name;
+						}
+						c += "tmp = this.data.slice("+offset.value+","+offset.plus(element.length)+");";
+						c += offset.add(element.length);
+						
+						c += element.values.map(function(value){
+							var vc = [], i, tc, o, mb, me, vo, vs;
+							var sb = 0|value.start/8, eb = 0|value.end/8;
+							for(i=sb*8; i<=eb*8; i+=8){
+								tc = 'tmp['+(i/8)+']'; o = i-value.start;
+								if(sb==eb){
+									mb = value.start%8;
+									me = value.end%8;
+									vo = mb;
+								}else if(i==sb*8){
+									mb = value.start%8;
+									me = 7;
+									vo = mb;
+								}else if(i==se*8){
+									mb = 0;
+									me = value.end%8;
+									vo = (8-value.start%8)+(i-sb*8);
+								}else{
+									mb = 0; me = 7;
+									vo = (8-value.start%8)+(i-sb*8);
+								}
+								if(mb!=0 || me!=7) tc = '('+tc+'&0x'+((2<<me)-(1<<mb)).toString(16)+')';
+								if(vo > 0) tc = tc+'>>'+vo;
+								else if(vo < 0) tc = tc+'<<'+vo;
+								vc.push('('+tc+')');
+							}
+							vs = vc.join('+');
+							if(value.type == 'Boolean'){
+								if(vc.length == 1) vs = '!!'+vs;
+								else vs = '!!('+vs+')';
+							}
+							return '\n\t'+base+'.'+value.name+'='+vs+';';
+						}).join('');
+
 						return c;
 					}
 					if(element instanceof node.Script){
@@ -250,6 +312,11 @@
 type_node
 	: String
 	| Int
+	| Boolean
+	;
+
+type_bits
+	: Int
 	| Boolean
 	;
 
@@ -345,6 +412,7 @@ def_record_element
 	| def_record_group {$$ = $1;}
 	| def_record_array {$$ = $1;}
 	| def_record_bytestream {$$ = $1;}
+	| def_record_bits {$$ = $1;}
 	;
 
 def_record_simpletype
@@ -363,4 +431,21 @@ def_record_array
 
 def_record_bytestream
 	: type_record_bytestream_type TOKEN LINE_END {$$ = new node.ByteStream($1, $2);}
+	;
+
+def_record_bits
+	: Bits ":" INTEGER LINE_END {$$ = new node.Bits($3, '', []);}
+	| Bits ":" INTEGER P_OPEN P_CLOSE {$$ = new node.Bits($3, '', []);}
+	| Bits ":" INTEGER P_OPEN def_record_bits_inner P_CLOSE {$$ = new node.Bits($3, '', $5);}
+	| Bits ":" INTEGER TOKEN P_OPEN def_record_bits_inner P_CLOSE {$$ = new node.Bits($3, $4, $6);}
+	;
+
+def_record_bits_inner
+	: def_record_bits_element def_record_bits_inner {$$ = [$1].concat($2);}
+	| def_record_bits_element {$$ = [$1];}
+	;
+
+def_record_bits_element
+	: INTEGER type_bits TOKEN LINE_END {$$ = new node.BitsType($1, $1, $2, $3);}
+	| INTEGER "~" INTEGER type_bits TOKEN LINE_END {$$ = new node.BitsType($1, $3, $4, $5);}
 	;
