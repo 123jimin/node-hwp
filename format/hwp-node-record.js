@@ -51,10 +51,27 @@ HWPNode.prototype.findChildren = function getChildren(name){
 
 for(var name in root.node){
 	root.node[name].prototype = new HWPNode();
-};
+}
 
 // Record
-var HWPRecord = function HWPRecord(offset, buffer){
+var HWPRecord = function HWPRecord(){};
+
+HWPRecord.prototype.toString = function(){
+	var toStr = function toStr(obj, t){
+		var s = t + obj.name;
+		if(obj.children) obj.children.forEach(function(o){
+			s += '\n'+toStr(o, t+'\t');
+		});
+		return s;
+	};
+	return toStr(this, '');
+};
+
+for(name in root.record){
+	root.record[name].prototype = new HWPRecord();
+}
+
+var HWPRawRecord = function HWPRawRecord(offset, buffer){
 	var header = buffer.readUInt32LE(offset); offset += 4;
 	this.tag = header&0x3FF;
 	this.level = (header>>10)&0x3FF;
@@ -67,7 +84,7 @@ var HWPRecord = function HWPRecord(offset, buffer){
 	this._offset = offset + this.size;
 };
 
-HWPRecord.prototype.resolve = function(){
+HWPRawRecord.prototype.resolve = function(){
 	var tag = root.tag.table[this.tag];
 	if(!tag){
 		console.error("Warning: unknown tag %d", this.tag);
@@ -84,12 +101,12 @@ HWPRecord.prototype.resolve = function(){
 root.record.getTree = function getTree(offset, buffer){
 	var record, records_flat = [];
 	while(offset < buffer.length){
-		record = new HWPRecord(offset, buffer);
+		record = new HWPRawRecord(offset, buffer);
 		offset = record._offset;
 		records_flat.push(record);
 	}
 
-	var prvr = records_flat[0], prv = prvr.resolve(), records = [prv];
+	var prvr = records_flat[0], prv = prvr.resolve(), records = [prv], tmp;
 	for(var i=1;i<records_flat.length;i++){
 		record = records_flat[i];
 		if(record.level == 0){
@@ -99,12 +116,18 @@ root.record.getTree = function getTree(offset, buffer){
 		}else{
 			while(prvr.level >= record.level){
 				prvr = prvr.parent;
+				tmp = prv.parent;
+				delete prv.parent;
+				prv = tmp;
 				if(!prvr) throw new Error('Invalid record root!');
 			}
-			prv.children.push(record);
-			record.parent = prv;
+			tmp = record.resolve();
+			prv.children.push(tmp);
+			record.parent = prvr;
+			tmp.parent = prv;
+			
 			prvr = record;
-			prv = prvr.resolve();
+			prv = tmp;
 		}
 	}
 	return records;

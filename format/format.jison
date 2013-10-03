@@ -159,7 +159,7 @@
 					return code;
 				}};
 				code += RT+"record."+o.name+" = function Record_"+o.name+"(data){\n";
-				code += "\tvar tmp; this.attr = {}; this.data = data;\n";
+				code += "\tvar tmp; this.attr = {}; this.data = data; this.name = \""+o.name+"\";\n";
 				code += o.schema.map(function(element){
 					var c;
 					if(element instanceof node.SimpleType){
