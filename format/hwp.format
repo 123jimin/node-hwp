@@ -128,6 +128,7 @@ tago BEGIN 12 DISTRIBUTE_DOC_DATA;
 # 13: Reserved
 tago BEGIN 14 COMPATIBLE_DOCUMENT;
 tago BEGIN 15 LAYOUT_COMPATIBILITY;
+tago BEGIN 78 FORBIDDEN_CHAR;
 
 # 4.1.1. 문서 속성
 record DOCUMENT_PROPERTIES {
@@ -220,3 +221,41 @@ record PARA_SHAPE {
 		18 Boolean KeepLines;
 	}
 }
+
+# 4.1.11 스타일
+record STYLE {
+	WString Name;
+	WString EngName;
+	Bits:1 {
+		0~2 Int Type;
+	}
+	Byte NextStyle;
+	Int16 LangId;
+	UInt16 ParaShape;
+	UInt16 CharShape;
+}
+
+# 4.1.12 문서 임의의 데이터
+record DOC_DATA {}
+
+# 4.1.13 배포용 문서 데이터 (TODO: 이 데이터의 의미 찾기)
+record DISTRIBUTE_DOC_DATA {
+	ByteStream:256 Data;
+}
+
+# 4.1.14 호환 문서 (TODO: enum)
+record COMPATIBLE_DOCUMENT {
+	UInt32 TargetProgram;
+}
+
+# 4.1.15 레이아웃 호환성 (TODO: 각각의 필드가 뜻하는 것 찾기)
+record LAYOUT_COMPATIBILITY {
+	UInt32 _Char;
+	UInt32 _Para;
+	UInt32 _Sec;
+	UInt32 _Obj;
+	UInt32 _Field;
+}
+
+# ??? 금칙 문자 (TODO: 어떻게 저장되는지 찾기)
+record FORBIDDEN_CHAR;

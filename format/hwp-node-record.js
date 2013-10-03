@@ -69,7 +69,11 @@ var HWPRecord = function HWPRecord(offset, buffer){
 
 HWPRecord.prototype.resolve = function(){
 	var tag = root.tag.table[this.tag];
-	if(!tag) throw new Error("Unknown tag: "+this.tag);
+	if(!tag){
+		console.error("Warning: unknown tag %d", this.tag);
+		this.children = [];
+		return this;
+	}
 	if(!root.record[tag]) throw new Error("Non-existing record type: "+tag);
 
 	var obj = new root.record[tag](this.data);
