@@ -63,13 +63,14 @@ var HWPRecord = function HWPRecord(offset, buffer){
 		this.size = buffer.readUInt32LE(offset);
 		offset += 4;
 	}
-	this.data = buffer.sice(offset, offset + this.size);
+	this.data = buffer.slice(offset, offset + this.size);
 	this._offset = offset + this.size;
 };
 
 HWPRecord.prototype.resolve = function(){
 	var tag = root.tag.table[this.tag];
 	if(!tag) throw new Error("Unknown tag: "+this.tag);
+	if(!root.record[tag]) throw new Error("Non-existing record type: "+tag);
 
 	var obj = new root.record[tag](this.data);
 	obj.children = [];

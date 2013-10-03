@@ -66,7 +66,7 @@
 				code += offset.add(1);
 				return code;
 			case "Word":
-				code = base+"."+simple.name+" = this.data.readUInt16("+offset.value+");";
+				code = base+"."+simple.name+" = this.data.readUInt16LE("+offset.value+");";
 				code += offset.add(2);
 				return code;
 			case "UInt8": case "Int8":
@@ -138,36 +138,36 @@
 					var code = "";
 					if(typeof this.value == 'number'){
 						code = "var offset={'value':"+this.value+"};";
-						this.value = 'offset';
+						this.value = 'offset.value';
 					}
 					return code;
 				}};
 				code += RT+"record."+o.name+" = function Record_"+o.name+"(data){\n";
-				code += "\tvar tmp; this.data = data;\n";
+				code += "\tvar tmp; this.attr = {}; this.data = data;\n";
 				code += o.schema.map(function(element){
 					var c;
 					if(element instanceof node.SimpleType){
-						return simpleTypeCode("this", element, offset);
+						return simpleTypeCode("this.attr", element, offset);
 					}
 					if(element instanceof node.Group){
-						c = "this."+element.name+" = {};\n\t";
+						c = "this.attr."+element.name+" = {};\n\t";
 						c += element.values.map(function(e){
-							return simpleTypeCode("this."+element.name, e, offset);
+							return simpleTypeCode("this.attr."+element.name, e, offset);
 						}).join('\n\t');
 						return c;
 					}
 					if(element instanceof node.Array){
-						c = "this."+element.name+" = [];"+offset.toObj()+"\n";
+						c = "this.attr."+element.name+" = [];"+offset.toObj()+"\n";
 						c += "\tfor(tmp=0;tmp<"+element.length+";tmp++){\n";
-						c += "\t\tthis."+element.name+"[tmp] = {};\n";
+						c += "\t\tthis.attr."+element.name+"[tmp] = {};\n";
 						c += "\t\t"+element.type.map(function(e){
-							return simpleTypeCode("this."+element.name+"[tmp]", e, offset);
+							return simpleTypeCode("this.attr."+element.name+"[tmp]", e, offset);
 						}).join('\n\t\t')+"\n";
 						c += "\t}";
 						return c;
 					}
 					if(element instanceof node.Script){
-						c = offset.toObj()+' (function(){'+element.script.trim()+'}());';
+						c = offset.toObj()+' (function(){'+element.script.trim()+'\n\t}());';
 						return c;
 					}
 					return "// FIXME: unprocessed type";
