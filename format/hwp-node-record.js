@@ -20,6 +20,13 @@ HWPNode.prototype.add = function add(elem){
 	this.setCount();
 };
 
+HWPNode.prototype.setAttr = function setAttr(attrs){
+	for(var name in attrs){
+		if(this.attr[name] === undefined) console.warn("Warning: unexpected attr %s", name);
+		this.attr[name] = attrs[name];
+	}
+};
+
 HWPNode.prototype.setCount = function setCount(){
 	if(this.attr.Count !== undefined) this.attr.Count = this.children.length;
 };
@@ -87,7 +94,7 @@ var HWPRawRecord = function HWPRawRecord(offset, buffer){
 HWPRawRecord.prototype.resolve = function(){
 	var tag = root.tag.table[this.tag];
 	if(!tag){
-		console.error("Warning: unknown tag %d", this.tag);
+		console.warn("Warning: unknown tag %d", this.tag);
 		this.children = [];
 		return this;
 	}
