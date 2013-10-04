@@ -6,6 +6,7 @@
 	};
 	node.Comment = function Comment(s){
 		this.value = s.slice(2);
+		this.type = "Comment";
 	};
 	node.Enum = function Enum(s, v){
 		this.name = s;
@@ -77,6 +78,7 @@
 	var simpleTypeCode = function(base, simple, offset){
 		var code = "";
 		switch(simple.type){
+			case "Comment": return "// "+simple.value;
 			case "Byte":
 				code = base+"."+simple.name+" = this.data.readUInt8("+offset.value+");";
 				code += offset.add(1);
@@ -213,7 +215,8 @@
 				code += o.schema.map(function(element){
 					var c;
 					if(element instanceof node.SimpleType
-						|| element instanceof node.Bits){
+						|| element instanceof node.Bits
+						|| element instanceof node.Comment){
 						return simpleTypeCode("this.attr", element, offset);
 					}
 					if(element instanceof node.Group){
@@ -234,7 +237,7 @@
 						return c; 
 					}
 					if(element instanceof node.Script){
-						c = offset.toObj()+' '+element.script.trim();
+						c = offset.toObj()+element.script.trim();
 						return c;
 					}
 					if(element instanceof node.ByteStream){
@@ -435,6 +438,7 @@ def_record_element
 	| def_record_array {$$ = $1;}
 	| def_record_bytestream {$$ = $1;}
 	| def_record_bits {$$ = $1;}
+	| COMMENT {$$ = new node.Comment($1);}
 	;
 
 def_record_simpletype
@@ -470,4 +474,5 @@ def_record_bits_inner
 def_record_bits_element
 	: INTEGER type_bits TOKEN LINE_END {$$ = new node.BitsType($1, $1, $2, $3);}
 	| INTEGER "~" INTEGER type_bits TOKEN LINE_END {$$ = new node.BitsType($1, $3, $4, $5);}
+	| COMMENT {$$ = new node.Comment($1);}
 	;

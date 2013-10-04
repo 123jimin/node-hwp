@@ -222,7 +222,8 @@ record FACE_NAME {
 		Byte XHeight;
 	}
 	{{ } }}
-	{{ if(this.attr.HasDefault){ /* TODO_SOMEDAY: Default Font Type */ }}
+	{{ if(this.attr.HasDefault){ }}
+	# TODO_SOMETIME: 이 곳 채워넣기
 	{{ } }}
 }
 
