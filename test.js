@@ -9,4 +9,7 @@ async.map(tests, function(name, callback){
 	test.run(function(err){
 		console.log(); callback(err);
 	});
+}, function(err){
+	if(err) console.error(err);
+	else console.log("Success!");
 });
