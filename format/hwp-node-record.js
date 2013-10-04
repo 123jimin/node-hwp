@@ -56,6 +56,27 @@ HWPNode.prototype.findChildren = function getChildren(name){
 	return this.children.filter(function(o){return o.name === name;});
 };
 
+// Make one if not exists
+HWPNode.prototype.getChildWith = function getChildWith(name, attr_name, attr_val){
+	name = name.toUpperCase();
+	for(var i=0;i<this.child.length;i++){
+		if(this.child[i].name === name && this.child[i].attr[attr_name] === attr_val)
+			return this.child[i];
+	}
+	var o = new root.node[name]();
+	o.attr[attr_name] = attr_val;
+	this.add(o); return o;
+};
+
+HWPNode.prototype.findChildWith = function findChildWith(name, attr_name, attr_val){
+	name = name.toUpperCase();
+	for(var i=0;i<this.child.length;i++){
+		if(this.child[i].name === name && this.child[i].attr[attr_name] === attr_val)
+			return this.child[i];
+	}
+	return null;
+};
+
 for(var name in root.node){
 	root.node[name].prototype = new HWPNode();
 }
