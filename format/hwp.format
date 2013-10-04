@@ -1,15 +1,48 @@
 ## hwp.format for describing HWP 5.0 records & HWPML nodes
-enum LineType1 {}
-enum LineType2 {}
-enum LineType3 {}
-enum LineWidth {}
-enum NumberType1 {}
-enum NumberType2 {}
-enum AlignType1 {}
-enum AlignType2 {}
-enum LangType {}
-enum LineWrapType {}
-enum TextWrapType {}
+enum LineType1 {
+	Solid; Dash; Dot; DashDot; DashDotDot; LongDash; Circle;
+	DoubleSlim; SlimThick; ThickSlim; SlimThickSlim; None;
+}
+enum LineType2 {
+	Solid; Dash; Dot; DashDot; DashDotDot; LongDash; Circle;
+	DoubleSlim; SlimThick; ThickSlim; SlimThickSlim;
+}
+enum LineType3 {
+	Solid; Dot; Thick; Dash; DashDot; DashDotDot;
+}
+enum LineWidth {
+	"0.1mm"; "0.12mm"; "0.15mm"; "0.2mm"; "0.25mm"; "0.3mm";
+	"0.4mm"; "0.5mm"; "0.6mm"; "0.7mm"; "1.0mm"; "1.5mm";
+	"2.0mm"; "3.0mm"; "4.0mm"; "5.0mm";
+}
+enum NumberType1 {
+	Digit; CircledDigit; RomanCapital; RomanSmall; LatinCapital;
+	LatinSmall; CircledLatinCapital; CircledLatinSmall; HangulSyllable;
+	CircledHangulSyllable; HangulJamo; CircledHangulJamo;
+	HangulPhonetic; Ideograph; CircledIdeograph;
+}
+enum NumberType2 {
+	Digit; CircledDigit; RomanCapital; RomanSmall; LatinCapital;
+	LatinSmall; CircledLatinCapital; CircledLatinSmall; HangulSyllable;
+	CircledHangulSyllable; HangulJamo; CircledHangulJamo;
+	HangulPhonetic; Ideograph; CircledIdeograph; DecagonCircle;
+	DecagonCircleHanja; Symbol; UserChar;
+}
+enum AlignType1 {
+	Justify; Left; Right; Center; Distribute; DistributeSpace;
+}
+enum AlignType2 {
+	Left; Center; Right;
+}
+enum LangType {
+	Hangul; Latin; Hanja; Japanese; Other; Symbol; User;
+}
+enum LineWrapType {
+	Break; Squeeze; Keep;
+}
+enum TextWrapType {
+	Square; Tight; Through; TopAndBottom; BehindText; InFrontText;
+}
 
 # HWPML nodes
 # 3. 루트 엘리먼트

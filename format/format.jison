@@ -7,6 +7,10 @@
 	node.Comment = function Comment(s){
 		this.value = s.slice(2);
 	};
+	node.Enum = function Enum(s, v){
+		this.name = s;
+		this.value = v;
+	};
 	node.Tag = function Tag(s, v){
 		this.name = s;
 		this.value = +v;
@@ -162,6 +166,9 @@
 			if(o == null) return "// FIXME: null";
 			if(o instanceof node.Comment){
 				return "// " + o.value;
+			}
+			if(o instanceof node.Enum){
+				return RT+"enum."+o.name+" = "+JSON.stringify(o.value)+";";
 			}
 			if(o instanceof node.Tag){
 				tags[o.name] = o.value; tagInverse[o.value] = o.name;
@@ -362,7 +369,19 @@ element
 	;
 
 def_enum
-	: ENUM TOKEN P_OPEN P_CLOSE {$$ = null;}
+	: ENUM TOKEN LINE_END {$$ = new node.Enum($2, []);}
+	| ENUM TOKEN P_OPEN P_CLOSE {$$ = new node.Enum($2, []);}
+	| ENUM TOKEN P_OPEN def_enum_inner P_CLOSE {$$ = new node.Enum($2, $4);}
+	;
+
+def_enum_inner
+	: def_enum_single def_enum_inner {$$ = [$1].concat($2);}
+	| def_enum_single {$$ = [$1];}
+	;
+
+def_enum_single
+	: QUOTED_STRING LINE_END? {$$ = $1.slice(1,-1);}
+	| TOKEN LINE_END? {$$ = $1;}
 	;
 
 def_node
