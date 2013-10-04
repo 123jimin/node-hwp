@@ -136,7 +136,7 @@ record DOCUMENT_PROPERTIES {
 	Group BeginNumber {
 		UInt16 Page;
 		UInt16 Footnote;
-		UInt16 EndNote;
+		UInt16 Endnote;
 		UInt16 Picture;
 		UInt16 Table;
 		UInt16 Equation;
