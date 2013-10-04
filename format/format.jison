@@ -64,6 +64,7 @@
 		this.name = n || '';
 		this.length = l;
 		this.values = a;
+		this.type = 'Bits';
 	};
 	node.Script = function Script(s){
 		this.script = s;
@@ -100,6 +101,48 @@
 			case "ColorRef":
 				code = base+"."+simple.name+" = this.data.readUInt32LE("+offset.value+");";
 				code += offset.add(4);
+				return code;
+			case "Bits":
+				if(simple.name){
+					code += "this.attr."+simple.name+" = {}; ";
+					base += '.'+simple.name;
+				}
+				code += "tmp = this.data.slice("+offset.value+","+offset.plus(simple.length)+");";
+				code += offset.add(simple.length);
+				
+				code += simple.values.map(function(value){
+					var vc = [], i, tc, o, mb, me, vo, vs;
+					var sb = 0|value.start/8, eb = 0|value.end/8;
+					for(i=sb*8; i<=eb*8; i+=8){
+						tc = 'tmp['+(i/8)+']'; o = i-value.start;
+						if(sb==eb){
+							mb = value.start%8;
+							me = value.end%8;
+							vo = mb;
+						}else if(i==sb*8){
+							mb = value.start%8;
+							me = 7;
+							vo = mb;
+						}else if(i==se*8){
+							mb = 0;
+							me = value.end%8;
+							vo = (8-value.start%8)+(i-sb*8);
+						}else{
+							mb = 0; me = 7;
+							vo = (8-value.start%8)+(i-sb*8);
+						}
+						if(mb!=0 || me!=7) tc = '('+tc+'&0x'+((2<<me)-(1<<mb)).toString(16)+')';
+						if(vo > 0) tc = tc+'>>'+vo;
+						else if(vo < 0) tc = tc+'<<'+vo;
+						vc.push('('+tc+')');
+					}
+					vs = vc.join('+');
+					if(value.type == 'Boolean'){
+						if(vc.length == 1) vs = '!!'+vs;
+						else vs = '!!('+vs+')';
+					}
+					return '\n\t'+base+'.'+value.name+'='+vs+';';
+				}).join('');
 				return code;
 			default: return "// FIXME: unprocessed simple type: "+simple.type;
 		}
@@ -140,7 +183,7 @@
 			if(o instanceof node.Record){
 				var offset = {'value': 0, 'add': function(v){
 					if(typeof this.value == 'number'){
-						this.value += v; return '';
+						this.value += +v; return '';
 					}
 					var code = ' ';
 					code += this.value+'+='+v+';';
@@ -162,7 +205,8 @@
 				code += "\tvar tmp; this.attr = {}; this.data = data; this.name = \""+o.name+"\";\n";
 				code += o.schema.map(function(element){
 					var c;
-					if(element instanceof node.SimpleType){
+					if(element instanceof node.SimpleType
+						|| element instanceof node.Bits){
 						return simpleTypeCode("this.attr", element, offset);
 					}
 					if(element instanceof node.Group){
@@ -180,56 +224,10 @@
 							return simpleTypeCode("this.attr."+element.name+"[tmp]", e, offset);
 						}).join('\n\t\t')+"\n";
 						c += "\t}";
-						return c;
-					}
-					if(element instanceof node.Bits){
-						var base = 'this.attr';
-						c = "";
-						if(element.name){
-							c += "this.attr."+element.name+" = {}; ";
-							base += '.'+element.name;
-						}
-						c += "tmp = this.data.slice("+offset.value+","+offset.plus(element.length)+");";
-						c += offset.add(element.length);
-						
-						c += element.values.map(function(value){
-							var vc = [], i, tc, o, mb, me, vo, vs;
-							var sb = 0|value.start/8, eb = 0|value.end/8;
-							for(i=sb*8; i<=eb*8; i+=8){
-								tc = 'tmp['+(i/8)+']'; o = i-value.start;
-								if(sb==eb){
-									mb = value.start%8;
-									me = value.end%8;
-									vo = mb;
-								}else if(i==sb*8){
-									mb = value.start%8;
-									me = 7;
-									vo = mb;
-								}else if(i==se*8){
-									mb = 0;
-									me = value.end%8;
-									vo = (8-value.start%8)+(i-sb*8);
-								}else{
-									mb = 0; me = 7;
-									vo = (8-value.start%8)+(i-sb*8);
-								}
-								if(mb!=0 || me!=7) tc = '('+tc+'&0x'+((2<<me)-(1<<mb)).toString(16)+')';
-								if(vo > 0) tc = tc+'>>'+vo;
-								else if(vo < 0) tc = tc+'<<'+vo;
-								vc.push('('+tc+')');
-							}
-							vs = vc.join('+');
-							if(value.type == 'Boolean'){
-								if(vc.length == 1) vs = '!!'+vs;
-								else vs = '!!('+vs+')';
-							}
-							return '\n\t'+base+'.'+value.name+'='+vs+';';
-						}).join('');
-
-						return c;
+						return c; 
 					}
 					if(element instanceof node.Script){
-						c = offset.toObj()+' (function(){'+element.script.trim()+'\n\t}());';
+						c = offset.toObj()+' '+element.script.trim();
 						return c;
 					}
 					if(element instanceof node.ByteStream){
