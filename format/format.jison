@@ -362,14 +362,15 @@ _label
 	| _token {$$ = $1;}
 	;
 
+type_enum
+	: ENUM TOKEN {$$ = $2;}
+	;
+
 type_node
 	: String
 	| Int
 	| Boolean
-	;
-
-type_enum
-	: ENUM TOKEN {$$ = $2}
+	| type_enum {$$ = "String";}
 	;
 
 type_bits

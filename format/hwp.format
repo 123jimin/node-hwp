@@ -41,6 +41,11 @@ enum LangType {
 enum HatchStyle {
 	null; Horizontal; Vertical; BackSlash; Slash; Cross; CrossDiagonal;
 }
+enum InfillMode {
+	Tile; TileHorzTop; TileHorzBottom; TileVertLeft; TileVertRight;
+	Total; Center; CenterTop; CenterBottom; LeftCenter; LeftTop; LeftBottom;
+	RightCenter; RightTop; RightBottom; Zoom;
+}
 enum LineWrapType {
 	Break; Squeeze; Keep;
 }
@@ -54,6 +59,15 @@ enum GradationType {
 }
 enum ShadowType {
 	null; Drop; Cont;
+}
+enum ImageEffectType {
+	RealPic; GrayScale; BlackWhite;
+}
+enum UnderlineType {
+	null; Bottom; Center; Top;
+}
+enum StrikeoutType {
+	None; Continuous;
 }
 enum VerAlignType {
 	Baseline; Top; Center; Bottom;
@@ -124,7 +138,7 @@ node BINITEM {
 # 4.3.2. 글꼴 정보
 node FACENAMELIST {}
 node FONTFACE {
-	String Lang;
+	enum LangType Lang;
 	Int Count;
 }
 node FONT {
@@ -162,6 +176,132 @@ node BORDERFILL {
 	Int CounterSlash default="0";
 	Int CounterBackSlash default="0";
 	Int BreakCellSeparateLine default="0";
+}
+node LEFTBORDER {
+	enum LineType1 Type default="Solid";
+	enum LineWidth Width default="0.12mm";
+	Int Color default="0";
+}
+node FILLBRUSH {}
+node WINDOWBRUSH {
+	Int FaceColor;
+	Int HatchColor;
+	Int HatchStyle;
+	Int Alpha;
+}
+node GRADATION {
+	enum GradationType Type;
+	Int Angle default="90";
+	Int CenterX default="0";
+	Int CenterY default="0";
+	Int Step default="50";
+	Int ColorNum default="2";
+	Int StepCenter default="50";
+	Int Alpha;
+}
+node COLOR {
+	Int Value;
+}
+node IMAGEBRUSH {
+	enum InfillMode Mode default="Tile";
+}
+node IMAGE {
+	Int Bright default="0";
+	Int Contrast default="0";
+	enum ImageEffectType Effect;
+	Int BinItem;
+	Int Alpha;
+}
+
+# 4.3.4. 글자 모양 정보
+node CHARSHAPELIST {
+	Int Count;
+}
+node CHARSHAPE {
+	Int Id;
+	Int Height default="1000";
+	Int TextColor default="0";
+	Int ShadeColor default="4294967295";
+	Boolean UseFontSpace default="false";
+	Boolean UseKerning default="false";
+	Int SymMark default="0";
+	Int BorderFillId;
+}
+node FONTID {
+	Int Hangul;
+	Int Latin;
+	Int Hanja;
+	Int Japanese;
+	Int Other;
+	Int Symbol;
+	Int User;
+}
+node RATIO {
+	Int Hangul default="100";
+	Int Latin default="100";
+	Int Hanja default="100";
+	Int Japanese default="100";
+	Int Other default="100";
+	Int Symbol default="100";
+	Int User default="100";
+}
+node CHARSPACING {
+	Int Hangul default="0";
+	Int Latin default="0";
+	Int Hanja default="0";
+	Int Japanese default="0";
+	Int Other default="0";
+	Int Symbol default="0";
+	Int User default="0";
+}
+node RELSIZE {
+	Int Hangul default="100";
+	Int Latin default="100";
+	Int Hanja default="100";
+	Int Japanese default="100";
+	Int Other default="100";
+	Int Symbol default="100";
+	Int User default="100";
+}
+node CHAROFFSET {
+	Int Hangul default="0";
+	Int Latin default="0";
+	Int Hanja default="0";
+	Int Japanese default="0";
+	Int Other default="0";
+	Int Symbol default="0";
+	Int User default="0";
+}
+node ITALIC {}
+node BOLD {}
+node UNDERLINE {
+	enum UnerlineType Type default="Bottom";
+	enum LineType2 Shape default="Solid";
+	Int Color default="0";
+}
+node STRIKEOUT {
+	enum StrikeoutType Type default="Continuous";
+	enum LineType2 Shape default="Solid";
+	Int Color default="0";
+}
+node OUTLINE {
+	enum LineType3 Type default="Solid";
+}
+node SHADOW {
+	enum ShadowType Type;
+	Int Color;
+	Int OffsetX default="10";
+	Int OffestY default="10";
+	Int Alpha;
+}
+node EMBOSS {}
+node ENGRAVE {}
+node SUPERSCRIPT {}
+node SUBSCRIPT {}
+
+# 4.3.5. 탭 정보
+node TABDEFLIST {
+	Int Count;
 }
 
 # HWP 레코드
@@ -292,12 +432,14 @@ record CHAR_SHAPE{
 	Array:7 FontCharOffsets
 		Int8 value;
 	Int32 Height;
+
+	Group Shadow;
 	Bits:4 {
 		0 Boolean Italic;
 		1 Boolean Bold;
 		# TODO: 밑줄 종류 및 모양
 		8~10 enum LineType3: Int OutlineType;
-		11~12 enum ShadowType: Int ShadowType;
+		11~12 enum ShadowType: Int Shadow:Type;
 		13 Boolean Emboss;
 		14 Boolean Engrave;
 		15 Boolean SuperScript;
@@ -308,23 +450,14 @@ record CHAR_SHAPE{
 		25 Boolean UseFontSpace;
 		30 Boolean UseKerning;
 	}
-	Int8 ShadowOffsetX;
-	Int8 ShadowOffsetY;
+	Int8 Shadow:OffsetX;
+	Int8 Shadow:OffsetY;
 	ColorRef TextColor;
 	ColorRef UnderlineColor;
 	ColorRef ShadeColor;
-	ColorRef ShadowColor;
+	ColorRef Shadow:Color;
 	UInt16 BorderFillId;
 	ColorRef StrikeColor;
-	
-	# 그림자
-	{{ if(this.attr.ShadowType){ }}
-	Group Shadow;
-	{{
-		this.attr.Shadow.Type = this.attr.ShadowType;
-		this.attr.Shadow.OffsetX = this.attr.ShadowOffsetX;
-		this.attr.Shadow.OffsetY = this.attr.ShadowOffsetY;
-	} }}
 
 	# TODO: 밑줄
 	# TODO: 취소선
@@ -350,6 +483,7 @@ record PARA_SHAPE {
 	Group ParaMargin;
 	Group ParaBorder;
 	Bits:4 {
+		# TODO: enum
 		0~1 Int ParaMargin:LineSpacingType;
 		2~4 enum AlignType1: Int Align;
 		5~6 enum BreakLatinWordType: Int BreakLatinWord;
@@ -367,6 +501,29 @@ record PARA_SHAPE {
 		25~27 Int Level;
 		28 Boolean ParaBorder:Connect;
 		29 Boolean ParaBorder:IgnoreMargin;
+		# TODO: 문단 꼬리 모양
+	}
+	Int32 ParaMargin:Left;
+	Int32 ParaMargin:Right;
+	Int32 ParaMargin:Indent;
+	Int32 ParaMargin:Prev;
+	Int32 ParaMargin:Next;
+	Int32 ParaMargin:LineSpacing;
+
+	UInt16 TabDef;
+	UInt16 Heading;
+
+	UInt16 ParaBorder:BorderFill;
+	Int16 ParaBorder:OffsetLeft;
+	Int16 ParaBorder:OffsetRight;
+	Int16 ParaBorder:OffsetTop;
+	Int16 ParaBorder:OffsetBottom;
+
+	Bits:4 {
+		# TODO: 표 40
+	}
+	Bits:4 {
+		# TODO: 표 41
 	}
 }
 
