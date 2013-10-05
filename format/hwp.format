@@ -1,4 +1,5 @@
 ## hwp.format for describing HWP 5.0 records & HWPML nodes
+# Explict enum
 enum LineType1 {
 	None; Solid; Dash; Dot; DashDot; DashDotDot; LongDash; Circle;
 	DoubleSlim; SlimThick; ThickSlim; SlimThickSlim;
@@ -8,7 +9,7 @@ enum LineType2 {
 	DoubleSlim; SlimThick; ThickSlim; SlimThickSlim;
 }
 enum LineType3 {
-	Solid; Dot; Thick; Dash; DashDot; DashDotDot;
+	null; Solid; Dot; Thick; Dash; DashDot; DashDotDot;
 }
 enum LineWidth {
 	"0.1mm"; "0.12mm"; "0.15mm"; "0.2mm"; "0.25mm"; "0.3mm";
@@ -37,11 +38,31 @@ enum AlignType2 {
 enum LangType {
 	Hangul; Latin; Hanja; Japanese; Other; Symbol; User;
 }
+enum HatchStyle {
+	null; Horizontal; Vertical; BackSlash; Slash; Cross; CrossDiagonal;
+}
 enum LineWrapType {
 	Break; Squeeze; Keep;
 }
 enum TextWrapType {
 	Square; Tight; Through; TopAndBottom; BehindText; InFrontText;
+}
+
+# Implict enum
+enum GradationType {
+	null; Linear; Radial; Conical; Square;
+}
+enum ShadowType {
+	null; Drop; Cont;
+}
+enum VerAlignType {
+	Baseline; Top; Center; Bottom;
+}
+enum HeadingType {
+	None; Outline; Number; Bullet;
+}
+enum BreakLatinWordType {
+	KeepWord; Hyphenation; BreakWord;
 }
 
 # HWPML nodes
@@ -229,22 +250,36 @@ record FACE_NAME {
 
 # 4.1.5 테두리 / 배경
 record BORDER_FILL {
-	UInt16 Property;
+	Bits:2 {
+		0 Boolean ThreeD;
+		1 Boolean Shadow;
+		# TODO: Slash / BackSlash
+	}
 	Array:4 BorderTypes
 		enum LineType1: UInt8 value;
 	Array:4 BorderWidths
 		enum LineWidth: UInt8 value;
 	Array:4 BorderColors
 		ColorRef value;
+	# 대각선은 따로 저장됨.
 	Group Diagonal {
 		UInt8 Type;
-		UInt8 Width;
+		enum LineWidth: UInt8 Width;
 		ColorRef Color;
 	}
-	
+
+	# TODO: 이것들이 의미하는 것 찾기.
+	UInt32 _type;
+	DWord _size;
+	Group WindowBrush {
+		ColorRef FaceColor;
+		ColorRef HatchColor;
+		enum HatchStyle: Int32 HatchStyle;
+	}
+	# TODO: Gradation
 }
 
-# 4.1.6. 글자 모양 (TODO)
+# 4.1.6. 글자 모양
 record CHAR_SHAPE{
 	Array:7 FontIDs
 		Word value;
@@ -260,31 +295,78 @@ record CHAR_SHAPE{
 	Bits:4 {
 		0 Boolean Italic;
 		1 Boolean Bold;
-		2~3 Int UnderlineType;
+		# TODO: 밑줄 종류 및 모양
+		8~10 enum LineType3: Int OutlineType;
+		11~12 enum ShadowType: Int ShadowType;
+		13 Boolean Emboss;
+		14 Boolean Engrave;
+		15 Boolean SuperScript;
+		16 Boolean SubScript;
+		# TODO: 취소선 종류 및 모양
+		# 숫자임.
+		21~24 Int SymMark;
+		25 Boolean UseFontSpace;
+		30 Boolean UseKerning;
 	}
+	Int8 ShadowOffsetX;
+	Int8 ShadowOffsetY;
+	ColorRef TextColor;
+	ColorRef UnderlineColor;
+	ColorRef ShadeColor;
+	ColorRef ShadowColor;
+	UInt16 BorderFillId;
+	ColorRef StrikeColor;
+	
+	# 그림자
+	{{ if(this.attr.ShadowType){ }}
+	Group Shadow;
+	{{
+		this.attr.Shadow.Type = this.attr.ShadowType;
+		this.attr.Shadow.OffsetX = this.attr.ShadowOffsetX;
+		this.attr.Shadow.OffsetY = this.attr.ShadowOffsetY;
+	} }}
+
+	# TODO: 밑줄
+	# TODO: 취소선
 }
 
 # 4.1.7 탭 정의
-record TAB_DEF {}
+record TAB_DEF {
+	# TODO
+}
 
 # 4.1.8 문단 번호
-record NUMBERING {}
+record NUMBERING {
+	# TODO
+}
 
 # 4.1.9 글머리표
-record BULLET {}
+record BULLET {
+	# TODO
+}
 
 # 4.1.10 문단 모양
 record PARA_SHAPE {
+	Group ParaMargin;
+	Group ParaBorder;
 	Bits:4 {
-		0~1 Int _SpaceType;
-		2~4 Int Align;
-		5~6 Int BreakLatinWord;
-		7 Int BreakNonLatinWord;
+		0~1 Int ParaMargin:LineSpacingType;
+		2~4 enum AlignType1: Int Align;
+		5~6 enum BreakLatinWordType: Int BreakLatinWord;
+		# HML에서 true / false로 구분
+		7 Boolean BreakNonLatinWord;
 		8 Boolean SnapToGrid;
 		9~15 Int Condense;
 		16 Boolean WidowOrphan;
 		17 Boolean KeepWithNext;
 		18 Boolean KeepLines;
+		19 Boolean PageBreakBefore;
+		20~21 enum VerAlignType: Int VerAlign;
+		22 Boolean FontLineHeight;
+		23~24 enum HeadingType: Int HeadingType;
+		25~27 Int Level;
+		28 Boolean ParaBorder:Connect;
+		29 Boolean ParaBorder:IgnoreMargin;
 	}
 }
 

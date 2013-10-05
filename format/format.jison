@@ -47,9 +47,6 @@
 		this.enum = e || null;
 		this.type = t;
 	};
-	node.EnumType = function EnumType(s){
-		this.name = s;
-	};
 	node.BitsType = function BitsType(sb, eb, t, e, s){
 		this.name = s;
 		this.type = t;
@@ -57,9 +54,10 @@
 		this.start = sb;
 		this.end = eb;
 	};
-	node.Group = function Group(s, a){
+	node.Group = function Group(s, a, d){
 		this.name = s;
 		this.values = a;
+		this.defined = !!d;
 	};
 	node.Array = function Array(t, l, s){
 		this.name = s;
@@ -83,31 +81,42 @@
 
 	var simpleTypeCode = function(RT, base, simple, offset){
 		var code = "", vname = base+"."+simple.name;
+		var genEnum = function(vname, e){
+			if(!e) return "";
+			var x = RT+"enum."+e+"["+vname+"]";
+			return "if("+x+"!==undefined)"+vname+"="+x+";";
+		};
 		switch(simple.type){
+			case "Undo": return offset.add(-simple.name);
 			case "Comment": return "// "+simple.value;
 			case "Byte":
 				code = vname+"=this.data.readUInt8("+offset.value+");";
-				if(simple.enum) code += vname + "="+RT+"enum."+simple.enum+"["+vname+"];";
+				code += genEnum(vname, simple.enum);
 				code += offset.add(1);
 				return code;
 			case "Word":
 				code = vname+"=this.data.readUInt16LE("+offset.value+");";
-				if(simple.enum) code += vname + "="+RT+"enum."+simple.enum+"["+vname+"];";
+				code += genEnum(vname, simple.enum);
 				code += offset.add(2);
+				return code;
+			case "DWord":
+				code = vname+"=this.data.readUInt32LE("+offset.value+");";
+				code += genEnum(vname, simple.enum);
+				code += offset.add(4);
 				return code;
 			case "UInt8": case "Int8":
 				code = vname+"=this.data.read"+simple.type+"("+offset.value+");";
-				if(simple.enum) code += vname + "="+RT+"enum."+simple.enum+"["+vname+"];";
+				code += genEnum(vname, simple.enum);
 				code += offset.add(1);
 				return code;
 			case "UInt16": case "Int16":
 				code = vname+"=this.data.read"+simple.type+"LE("+offset.value+");";
-				if(simple.enum) code += vname + "="+RT+"enum."+simple.enum+"["+vname+"];";
+				code += genEnum(vname, simple.enum);
 				code += offset.add(2);
 				return code;
 			case "UInt32": case "Int32":
 				code = vname+"=this.data.read"+simple.type+"LE("+offset.value+");";
-				if(simple.enum) code += vname + "="+RT+"enum."+simple.enum+"["+vname+"];";
+				code += genEnum(vname, simple.enum);
 				code += offset.add(4);
 				return code;
 			case "WString":
@@ -130,6 +139,7 @@
 				code += offset.add(simple.length);
 				
 				code += simple.values.map(function(value){
+					if(value.type == 'Comment') return "\n\t// "+value.value;
 					var vc = [], i, tc, o, mb, me, vo, vs;
 					var sb = 0|value.start/8, eb = 0|value.end/8;
 					for(i=sb*8; i<=eb*8; i+=8){
@@ -142,18 +152,18 @@
 							mb = value.start%8;
 							me = 7;
 							vo = mb;
-						}else if(i==se*8){
+						}else if(i==eb*8){
 							mb = 0;
 							me = value.end%8;
-							vo = (8-value.start%8)+(i-sb*8);
+							vo = -((8-value.start%8)+(i-sb*8-8));
 						}else{
 							mb = 0; me = 7;
-							vo = (8-value.start%8)+(i-sb*8);
+							vo = -((8-value.start%8)+(i-sb*8-8));
 						}
 						if(mb!=0 || me!=7) tc = '('+tc+'&0x'+((2<<me)-(1<<mb)).toString(16)+')';
-						if(vo > 0) tc = tc+'>>'+vo;
-						else if(vo < 0) tc = tc+'<<'+vo;
-						vc.push('('+tc+')');
+						if(vo > 0) tc = '('+tc+'>>'+vo+')';
+						else if(vo < 0) tc = '('+tc+'<<'+(-vo)+')';
+						vc.push(tc);
 					}
 					vs = vc.join('+');
 					if(value.type == 'Boolean'){
@@ -161,7 +171,7 @@
 						else vs = '!!('+vs+')';
 					}
 					vs = '\n\t'+base+'.'+value.name+'='+vs+';';
-					if(value.enum) vs += base+'.'+value.name+'='+RT+'enum.'+value.enum+'['+base+'.'+value.name+'];';
+					vs += genEnum(base+'.'+value.name, value.enum);
 					return vs;
 				}).join('');
 				return code;
@@ -235,7 +245,7 @@
 						return simpleTypeCode(RT, "this.attr", element, offset);
 					}
 					if(element instanceof node.Group){
-						c = "this.attr."+element.name+" = {};\n\t";
+						if(!element.defined) c = "this.attr."+element.name+" = {};\n\t";
 						c += element.values.map(function(e){
 							return simpleTypeCode(RT, "this.attr."+element.name, e, offset);
 						}).join('\n\t');
@@ -314,6 +324,7 @@
 "ByteStream"	return "ByteStream";
 "Bits"	return "Bits";
 "Group"	return "Group";
+"GroupAdd"	return "SimpleGroup";
 
 "record"	return "RECORD";
 "type"	return "TYPE";
@@ -322,6 +333,10 @@
 "root"	return "ROOT";
 "tago"	return "TAG_OFFSET";
 "tag"	return "TAG";
+
+"Undo"	return "UNDO";
+
+"null"	return "NULL";
 
 "="	return "=";
 ":"	return ":";
@@ -336,6 +351,16 @@
 
 %start entry_point
 %%
+
+_token
+	: TOKEN {$$ = $1}
+	| QUOTED_STRING {$$ = $1.slice(1,-1);}
+	;
+
+_label
+	: _token ":" _label {$$ = $1+'.'+$3;}
+	| _token {$$ = $1;}
+	;
 
 type_node
 	: String
@@ -414,6 +439,7 @@ def_enum_inner
 def_enum_single
 	: QUOTED_STRING LINE_END? {$$ = $1.slice(1,-1);}
 	| TOKEN LINE_END? {$$ = $1;}
+	| NULL LINE_END? {$$ = null;}
 	;
 
 def_node
@@ -471,21 +497,27 @@ def_record_element
 	;
 
 def_record_simpletype
-	: type_record_enum TOKEN LINE_END {$$ = new node.SimpleType($1.value, $1.enum, $2);}
+	: type_record_enum _label LINE_END {$$ = new node.SimpleType($1.value, $1.enum, $2);}
+	| UNDO INTEGER LINE_END {$$ = new node.SimpleType('Undo', null, $2);}
 	| SCRIPT {$$ = new node.Script($1.slice(2,-2));}
 	;
 
 def_record_group
-	: Group TOKEN P_OPEN def_record_inner P_CLOSE {$$ = new node.Group($2, $4);}
+	: Group _label LINE_END {$$ = new node.Group($2, []);}
+	| Group _label P_OPEN P_CLOSE {$$ = new node.Group($2, []);}
+	| Group _label P_OPEN def_record_inner P_CLOSE {$$ = new node.Group($2, $4);}
+	| GroupAdd _label LINE_END {$$ = new node.Group($2, [], true);}
+	| GroupAdd _label P_OPEN P_CLOSE {$$ = new node.Group($2, [], true);}
+	| GroupAdd _label P_OPEN def_record_inner P_CLOSE {$$ = new node.Group($2, $4, true);}
 	;
 
 def_record_array
-	: type_record_array_type TOKEN def_record_simpletype {$$ = new node.Array([$3], $1, $2);}
-	| type_record_array_type TOKEN P_OPEN def_record_inner P_CLOSE {$$ = new node.Array($4, $1, $2);}
+	: type_record_array_type _label def_record_simpletype {$$ = new node.Array([$3], $1, $2);}
+	| type_record_array_type _label P_OPEN def_record_inner P_CLOSE {$$ = new node.Array($4, $1, $2);}
 	;
 
 def_record_bytestream
-	: type_record_bytestream_type TOKEN LINE_END {$$ = new node.ByteStream($1, $2);}
+	: type_record_bytestream_type _label LINE_END {$$ = new node.ByteStream($1, $2);}
 	;
 
 def_record_bits
@@ -501,7 +533,7 @@ def_record_bits_inner
 	;
 
 def_record_bits_element
-	: INTEGER type_bits_enum TOKEN LINE_END {$$ = new node.BitsType($1, $1, $2.value, $2.enum, $3);}
-	| INTEGER "~" INTEGER type_bits_enum TOKEN LINE_END {$$ = new node.BitsType($1, $3, $4.value, $4.enum, $5);}
+	: INTEGER type_bits_enum _label LINE_END {$$ = new node.BitsType($1, $1, $2.value, $2.enum, $3);}
+	| INTEGER "~" INTEGER type_bits_enum _label LINE_END {$$ = new node.BitsType($1, $3, $4.value, $4.enum, $5);}
 	| COMMENT {$$ = new node.Comment($1);}
 	;
