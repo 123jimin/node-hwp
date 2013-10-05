@@ -8,9 +8,10 @@
 		this.value = s.slice(2);
 		this.type = "Comment";
 	};
-	node.Enum = function Enum(s, v){
+	node.Enum = function Enum(s, v, t){
 		this.name = s;
 		this.value = v;
+		this.type = t || 'UInt8';
 	};
 	node.Tag = function Tag(s, v){
 		this.name = s;
@@ -41,13 +42,18 @@
 			this.options[a[0]] = a[1];
 		}, this);
 	};
-	node.SimpleType = function SimpleType(t, s){
+	node.SimpleType = function SimpleType(t, e, s){
 		this.name = s;
+		this.enum = e || null;
 		this.type = t;
 	};
-	node.BitsType = function BitsType(sb, eb, t, s){
+	node.EnumType = function EnumType(s){
+		this.name = s;
+	};
+	node.BitsType = function BitsType(sb, eb, t, e, s){
 		this.name = s;
 		this.type = t;
+		this.enum = e || null;
 		this.start = sb;
 		this.end = eb;
 	};
@@ -75,37 +81,44 @@
 		this.script = s;
 	};
 
-	var simpleTypeCode = function(base, simple, offset){
-		var code = "";
+	var simpleTypeCode = function(RT, base, simple, offset){
+		var code = "", vname = base+"."+simple.name;
 		switch(simple.type){
 			case "Comment": return "// "+simple.value;
 			case "Byte":
-				code = base+"."+simple.name+" = this.data.readUInt8("+offset.value+");";
+				code = vname+"=this.data.readUInt8("+offset.value+");";
+				if(simple.enum) code += vname + "="+RT+"enum."+simple.enum+"["+vname+"];";
 				code += offset.add(1);
 				return code;
 			case "Word":
-				code = base+"."+simple.name+" = this.data.readUInt16LE("+offset.value+");";
+				code = vname+"=this.data.readUInt16LE("+offset.value+");";
+				if(simple.enum) code += vname + "="+RT+"enum."+simple.enum+"["+vname+"];";
 				code += offset.add(2);
 				return code;
 			case "UInt8": case "Int8":
-				code = base+"."+simple.name+" = this.data.read"+simple.type+"("+offset.value+");";
+				code = vname+"=this.data.read"+simple.type+"("+offset.value+");";
+				if(simple.enum) code += vname + "="+RT+"enum."+simple.enum+"["+vname+"];";
 				code += offset.add(1);
 				return code;
 			case "UInt16": case "Int16":
-				code = base+"."+simple.name+" = this.data.read"+simple.type+"LE("+offset.value+");";
+				code = vname+"=this.data.read"+simple.type+"LE("+offset.value+");";
+				if(simple.enum) code += vname + "="+RT+"enum."+simple.enum+"["+vname+"];";
 				code += offset.add(2);
 				return code;
 			case "UInt32": case "Int32":
-				code = base+"."+simple.name+" = this.data.read"+simple.type+"LE("+offset.value+");";
+				code = vname+"=this.data.read"+simple.type+"LE("+offset.value+");";
+				if(simple.enum) code += vname + "="+RT+"enum."+simple.enum+"["+vname+"];";
 				code += offset.add(4);
 				return code;
 			case "WString":
 				code = "tmp = this.data.readUInt16LE("+offset.value+");";
 				code += offset.add(2) + offset.toObj();
-				code += " for("+base+"."+simple.name+"='';tmp-->0;){"+base+"."+simple.name+"+=String.fromCharCode(this.data.readUInt16LE("+offset.value+"));"+offset.add(2)+"}";
+				code += " for("+vname+"='';tmp-->0;){";
+				code += vname+"+=String.fromCharCode(this.data.readUInt16LE("+offset.value+"));"+offset.add(2);
+				code += "}";
 				return code;
 			case "ColorRef":
-				code = base+"."+simple.name+" = this.data.readUInt32LE("+offset.value+");";
+				code = vname+"=this.data.readUInt32LE("+offset.value+");";
 				code += offset.add(4);
 				return code;
 			case "Bits":
@@ -113,7 +126,7 @@
 					code += "this.attr."+simple.name+" = {}; ";
 					base += '.'+simple.name;
 				}
-				code += "tmp = this.data.slice("+offset.value+","+offset.plus(simple.length)+");";
+				code += "tmp=this.data.slice("+offset.value+","+offset.plus(simple.length)+");";
 				code += offset.add(simple.length);
 				
 				code += simple.values.map(function(value){
@@ -147,7 +160,9 @@
 						if(vc.length == 1) vs = '!!'+vs;
 						else vs = '!!('+vs+')';
 					}
-					return '\n\t'+base+'.'+value.name+'='+vs+';';
+					vs = '\n\t'+base+'.'+value.name+'='+vs+';';
+					if(value.enum) vs += base+'.'+value.name+'='+RT+'enum.'+value.enum+'['+base+'.'+value.name+'];';
+					return vs;
 				}).join('');
 				return code;
 			default: return "// FIXME: unprocessed simple type: "+simple.type;
@@ -217,12 +232,12 @@
 					if(element instanceof node.SimpleType
 						|| element instanceof node.Bits
 						|| element instanceof node.Comment){
-						return simpleTypeCode("this.attr", element, offset);
+						return simpleTypeCode(RT, "this.attr", element, offset);
 					}
 					if(element instanceof node.Group){
 						c = "this.attr."+element.name+" = {};\n\t";
 						c += element.values.map(function(e){
-							return simpleTypeCode("this.attr."+element.name, e, offset);
+							return simpleTypeCode(RT, "this.attr."+element.name, e, offset);
 						}).join('\n\t');
 						return c;
 					}
@@ -231,7 +246,7 @@
 						c += "\tfor(tmp=0;tmp<"+element.length+";tmp++){\n";
 						c += "\t\tthis.attr."+element.name+"[tmp] = {};\n";
 						c += "\t\t"+element.type.map(function(e){
-							return simpleTypeCode("this.attr."+element.name+"[tmp]", e, offset);
+							return simpleTypeCode(RT, "this.attr."+element.name+"[tmp]", e, offset);
 						}).join('\n\t\t')+"\n";
 						c += "\t}";
 						return c; 
@@ -328,9 +343,18 @@ type_node
 	| Boolean
 	;
 
+type_enum
+	: ENUM TOKEN {$$ = $2}
+	;
+
 type_bits
 	: Int
 	| Boolean
+	;
+
+type_bits_enum
+	: type_bits {$$ = {'value': $1};}
+	| type_enum ":" type_bits {$$ = {'value': $3, 'enum': $1};}
 	;
 
 type_record
@@ -340,6 +364,11 @@ type_record
 	| UInt8 | UInt16 | UInt32
 	| Int8 | Int16 | Int32
 	| ColorRef
+	;
+
+type_record_enum
+	: type_record {$$ = {'value': $1};}
+	| type_enum ":" type_record {$$ = {'value': $3, 'enum': $1};}
 	;
 
 type_record_array_type
@@ -442,7 +471,7 @@ def_record_element
 	;
 
 def_record_simpletype
-	: type_record TOKEN LINE_END {$$ = new node.SimpleType($1, $2);}
+	: type_record_enum TOKEN LINE_END {$$ = new node.SimpleType($1.value, $1.enum, $2);}
 	| SCRIPT {$$ = new node.Script($1.slice(2,-2));}
 	;
 
@@ -472,7 +501,7 @@ def_record_bits_inner
 	;
 
 def_record_bits_element
-	: INTEGER type_bits TOKEN LINE_END {$$ = new node.BitsType($1, $1, $2, $3);}
-	| INTEGER "~" INTEGER type_bits TOKEN LINE_END {$$ = new node.BitsType($1, $3, $4, $5);}
+	: INTEGER type_bits_enum TOKEN LINE_END {$$ = new node.BitsType($1, $1, $2.value, $2.enum, $3);}
+	| INTEGER "~" INTEGER type_bits_enum TOKEN LINE_END {$$ = new node.BitsType($1, $3, $4.value, $4.enum, $5);}
 	| COMMENT {$$ = new node.Comment($1);}
 	;

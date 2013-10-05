@@ -1,7 +1,7 @@
 ## hwp.format for describing HWP 5.0 records & HWPML nodes
 enum LineType1 {
-	Solid; Dash; Dot; DashDot; DashDotDot; LongDash; Circle;
-	DoubleSlim; SlimThick; ThickSlim; SlimThickSlim; None;
+	None; Solid; Dash; Dot; DashDot; DashDotDot; LongDash; Circle;
+	DoubleSlim; SlimThick; ThickSlim; SlimThickSlim;
 }
 enum LineType2 {
 	Solid; Dash; Dot; DashDot; DashDotDot; LongDash; Circle;
@@ -227,13 +227,13 @@ record FACE_NAME {
 	{{ } }}
 }
 
-# 4.1.5 테두리 / 배경 (TODO: 정말 이렇게 대각선이 따로 저장되는 지 확인하기)
+# 4.1.5 테두리 / 배경
 record BORDER_FILL {
 	UInt16 Property;
 	Array:4 BorderTypes
-		UInt8 value;
+		enum LineType1: UInt8 value;
 	Array:4 BorderWidths
-		UInt8 value;
+		enum LineWidth: UInt8 value;
 	Array:4 BorderColors
 		ColorRef value;
 	Group Diagonal {
@@ -241,6 +241,7 @@ record BORDER_FILL {
 		UInt8 Width;
 		ColorRef Color;
 	}
+	
 }
 
 # 4.1.6. 글자 모양 (TODO)
@@ -255,6 +256,12 @@ record CHAR_SHAPE{
 		UInt8 value;
 	Array:7 FontCharOffsets
 		Int8 value;
+	Int32 Height;
+	Bits:4 {
+		0 Boolean Italic;
+		1 Boolean Bold;
+		2~3 Int UnderlineType;
+	}
 }
 
 # 4.1.7 탭 정의
