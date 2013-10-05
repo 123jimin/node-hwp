@@ -69,6 +69,12 @@ enum UnderlineType {
 enum StrikeoutType {
 	None; Continuous;
 }
+enum TabItemType {
+	Left; Right; Center; Decimal;
+}
+enum TextOffsetType {
+	percent; hwpunit;
+}
 enum VerAlignType {
 	Baseline; Top; Center; Bottom;
 }
@@ -77,6 +83,12 @@ enum HeadingType {
 }
 enum BreakLatinWordType {
 	KeepWord; Hyphenation; BreakWord;
+}
+enum LineSpacingType {
+	Precent; Fixed; BetweenLines; AtLeast;
+}
+enum StyleType {
+	Para; Char;
 }
 
 # HWPML nodes
@@ -303,7 +315,122 @@ node SUBSCRIPT {}
 node TABDEFLIST {
 	Int Count;
 }
+node TABDEF {
+	Int Id;
+	Boolean AutoTabLeft default="false";
+	Boolean AutoTabRight default="false";
+}
+node TABITEM {
+	Int Pos;
+	enum TabItemType Type default="Left";
+	enum LineType2 Leader default="Solid";
+}
+node NUMBERINGLIST {
+	Int Count;
+}
+node Numbering {
+	Int Id;
+	Int Start default="1";
+}
+node PARAHEAD {
+	Int Level;
+	enum AlignType2 Alignment default="Left";
+	Boolean UseInstWidth default="true";
+	Boolean AutoIndent default="true";
+	Int WidthAdjust default="0";
+	enum TextOffsetType TextOffset default="50";
+	enum NumberType1 NumFormat default="Digit";
+	Int CharShape;
+}
 
+# 4.3.6. 글머리표 정보
+node BULLETLIST {
+	Int Count;
+}
+node BULLET {
+	Int Id;
+	String Char;
+	Boolean Image default="false";
+}
+
+# 4.3.7. 문단 모양 정보
+node PARASHAPELIST {
+	Int Count;
+}
+node PARASHAPE {
+	Int Id;
+	enum AlignmentType1 Align default="Justify";
+	enum VerAlignType VerAlign default="Baseline";
+	enum HeadingType HeadingType default="None";
+	Int Heading;
+	Int Level default="0";
+	Int TabDef;
+	enum BreakLatinWordType BreakLatinWord default="KeepWord";
+	Boolean BreakNonLatinWord default="true";
+	Int Condense default="0";
+	Boolean WidowOrphan default="false";
+	Boolean KeepWithNext default="false";
+	Boolean KeepLines default="false";
+	Boolean PageBreakBefore default="false";
+	Boolean FontLineHeight default="false";
+	Boolean SnapToGrid default="true";
+	enum LineWrapType LineWrap default="break";
+	Boolean AutoSpaceEAsianEng default="true";
+	Boolean AutoSpaceEAsianNum default="true";
+}
+node PARAMARGIN {
+	# 숫자 또는 숫자 다음 ch
+	String Indent default="0";
+	Int Left default="0";
+	Int Right default="0";
+	Int Prev default="0";
+	Int Next default="0";
+	enum LineSpacingType LineSpacingType default="Percent";
+	Int LineSpacing default="160";
+}
+node PARABORDER {
+	Int BorderFill;
+	Int OffsetLeft;
+	Int OffsetRight;
+	Int OffsetTop;
+	Int OffsetBottom;
+	Boolean Connect default="false";
+	Boolean IgnoreMargin default="false";
+}
+
+# 4.3.8. 스타일 정보
+node STYLELIST {
+	Int Count;
+}
+node STYLE {
+	Int Id;
+	enum StyleType Type default="Para";
+	String Name;
+	String EngName;
+	Int ParaShape;
+	Int CharShape;
+	Int NextStyle;
+	# TODO: 아래 두 개 타입 찾기
+	String LangId;
+	String LockForm;
+}
+
+# 4.3.9. 메모 정보
+node MEMOSHAPELIST {
+	Int Count;
+}
+node MEMO {
+	Int Id;
+	Int Width default="0";
+	# TODO: enum 찾기
+	String LineType;
+	Int LineColor;
+	Int FillColor;
+	Int ActiveColor;
+	# TODO: 타입 찾기
+	String MemoType;
+}
+	
 # HWP 레코드
 tag BEGIN 16;
 tago BEGIN 0 DOCUMENT_PROPERTIES;

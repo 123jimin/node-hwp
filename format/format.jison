@@ -209,7 +209,10 @@
 				code += RT+"node."+o.name+" = function Node_"+o.name+"(){\n";
 				code += "\tthis.name = \""+o.name+"\"; this.attr = {};\n";
 				code += o.schema.map(function(nodeType){
-					return "this.attr."+nodeType.name+" = "+(nodeType.options.default?"\""+nodeType.options.default+"\"":'null')+";";
+					if(nodeType instanceof node.Comment)
+						return "// "+nodeType.value;
+					else
+						return "this.attr."+nodeType.name+" = "+(nodeType.options.default?"\""+nodeType.options.default+"\"":'null')+";";
 				}).map(function(s){return '\t'+s+'\n';}).join('');
 				code += "};";
 				return code;
@@ -457,6 +460,7 @@ def_node_inner
 def_node_element
 	: type_node TOKEN LINE_END {$$ = new node.NodeType($1, $2, []);}
 	| type_node TOKEN def_node_element_options LINE_END {$$ = new node.NodeType($1, $2, $3);}
+	| COMMENT {$$ = new node.Comment($1);}
 	;
 
 def_node_element_options
