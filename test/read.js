@@ -1,8 +1,10 @@
 var assert = require('assert');
 var hwp = require('../');
 
+const file = 'table_border_1';
+
 var test = function(ok){
-	hwp.open('./test/files/1.hwp', function(err, doc){
+	hwp.open('./test/files/'+file+'.hwp', function(err, doc){
 		assert.ifError(err);
 		console.log(doc.toHML());
 		ok();

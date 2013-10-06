@@ -104,9 +104,9 @@ HWPNode.prototype.findChildren = function getChildren(name){
 // Make one if not exists
 HWPNode.prototype.getChildWith = function getChildWith(name, attr_name, attr_val){
 	name = name.toUpperCase();
-	for(var i=0;i<this.child.length;i++){
-		if(this.child[i].name === name && this.child[i].attr[attr_name] === attr_val)
-			return this.child[i];
+	for(var i=0;i<this.children.length;i++){
+		if(this.children[i].name === name && this.children[i].attr[attr_name] === attr_val)
+			return this.children[i];
 	}
 	var o = new root.node[name]();
 	o.attr[attr_name] = attr_val;
@@ -115,9 +115,9 @@ HWPNode.prototype.getChildWith = function getChildWith(name, attr_name, attr_val
 
 HWPNode.prototype.findChildWith = function findChildWith(name, attr_name, attr_val){
 	name = name.toUpperCase();
-	for(var i=0;i<this.child.length;i++){
-		if(this.child[i].name === name && this.child[i].attr[attr_name] === attr_val)
-			return this.child[i];
+	for(var i=0;i<this.children.length;i++){
+		if(this.children[i].name === name && this.children[i].attr[attr_name] === attr_val)
+			return this.children[i];
 	}
 	return null;
 };

@@ -54,6 +54,9 @@ enum TextWrapType {
 }
 
 # Implict enum
+enum FontType {
+	rep; ttf; hft;
+}
 enum GradationType {
 	null; Linear; Radial; Conical; Square;
 }
@@ -155,7 +158,7 @@ node FONTFACE {
 }
 node FONT {
 	Int Id;
-	String Type;
+	enum FontType Type;
 	String Name;
 }
 node SUBSTFONT {
@@ -190,6 +193,26 @@ node BORDERFILL {
 	Int BreakCellSeparateLine default="0";
 }
 node LEFTBORDER {
+	enum LineType1 Type default="Solid";
+	enum LineWidth Width default="0.12mm";
+	Int Color default="0";
+}
+node RIGHTBORDER {
+	enum LineType1 Type default="Solid";
+	enum LineWidth Width default="0.12mm";
+	Int Color default="0";
+}
+node TOPBORDER {
+	enum LineType1 Type default="Solid";
+	enum LineWidth Width default="0.12mm";
+	Int Color default="0";
+}
+node BOTTOMBORDER {
+	enum LineType1 Type default="Solid";
+	enum LineWidth Width default="0.12mm";
+	Int Color default="0";
+}
+node DIAGONAL {
 	enum LineType1 Type default="Solid";
 	enum LineWidth Width default="0.12mm";
 	Int Color default="0";
@@ -471,8 +494,17 @@ record DOCUMENT_PROPERTIES {
 
 # 4.1.2. 아이피 매핑 헤더
 record ID_MAPPINGS {
-	Array:16 MappingTable
-		Int32 Count;
+	Int32 BinDataCount;
+	Array:7 FontCount
+		Int32 value;
+	Int32 BorderFillCount;
+	Int32 CharShapeCount;
+	Int32 TabDefCount;
+	Int32 NumberingCount;
+	Int32 BulletCount;
+	Int32 ParaShapeCount;
+	Int32 StyleCount;
+	Int32 MemoCount;
 }
 
 # 4.1.3. 바이너리 데이터 (TODO: 문서 설명이 정확하지 않은 듯 함)
@@ -483,6 +515,8 @@ record BIN_DATA {
 # 4.1.4. 글꼴 (TODO: 직접 데이터 처리해야 됨)
 record FACE_NAME {
 	Bits:1 {
+		# 문서에 없음
+		0~1 enum FontType: Int Type;
 		5 Boolean HasDefault;
 		6 Boolean HasShape;
 		7 Boolean HasSubst;
@@ -491,7 +525,7 @@ record FACE_NAME {
 	{{ if(this.attr.HasSubst){ }}
 	Group SubstFont {
 		Bits:1 {
-			0~1 Int Type;
+			0~1 enum FontType: Int Type;
 		}
 		WString Name;
 	}
@@ -522,13 +556,28 @@ record BORDER_FILL {
 		1 Boolean Shadow;
 		# TODO: Slash / BackSlash
 	}
-	Array:4 BorderTypes
-		enum LineType1: UInt8 value;
-	Array:4 BorderWidths
-		enum LineWidth: UInt8 value;
-	Array:4 BorderColors
+
+	# 문서와 다르게 이렇게 저장됨.
+	Group LeftBorder {
+		enum LineType1: UInt8 Type;
+		enum LineWidth: UInt8 Width;
 		ColorRef value;
-	# 대각선은 따로 저장됨.
+	}
+	Group RightBorder {
+		enum LineType1: UInt8 Type;
+		enum LineWidth: UInt8 Width;
+		ColorRef value;
+	}
+	Group TopBorder {
+		enum LineType1: UInt8 Type;
+		enum LineWidth: UInt8 Width;
+		ColorRef value;
+	}
+	Group BottomBorder {
+		enum LineType1: UInt8 Type;
+		enum LineWidth: UInt8 Width;
+		ColorRef value;
+	}
 	Group Diagonal {
 		UInt8 Type;
 		enum LineWidth: UInt8 Width;
@@ -538,11 +587,13 @@ record BORDER_FILL {
 	# TODO: 이것들이 의미하는 것 찾기.
 	UInt32 _type;
 	DWord _size;
+	{{ if(this.attr._type){ /* WindowBrush가 없는 것도 있음. */ }}
 	Group WindowBrush {
 		ColorRef FaceColor;
 		ColorRef HatchColor;
 		enum HatchStyle: Int32 HatchStyle;
 	}
+	{{ } }}
 	# TODO: Gradation
 }
 
