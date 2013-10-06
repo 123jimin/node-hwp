@@ -661,8 +661,8 @@ record PARA_SHAPE {
 	Group ParaMargin;
 	Group ParaBorder;
 	Bits:4 {
-		# TODO: enum
-		0~1 Int ParaMargin:LineSpacingType;
+		# LineSpacingType이 2개 있음. (2007 이하, 초과)
+		0~1 enum LineSpacingType: Int ParaMargin:LineSpacingType;
 		2~4 enum AlignType1: Int Align;
 		5~6 enum BreakLatinWordType: Int BreakLatinWord;
 		# HML에서 true / false로 구분
@@ -683,9 +683,11 @@ record PARA_SHAPE {
 	}
 	Int32 ParaMargin:Left;
 	Int32 ParaMargin:Right;
+	# TODO: 간격 종류는 어디에서?
 	Int32 ParaMargin:Indent;
 	Int32 ParaMargin:Prev;
 	Int32 ParaMargin:Next;
+	# 2007 이하
 	Int32 ParaMargin:LineSpacing;
 
 	UInt16 TabDef;
@@ -698,11 +700,17 @@ record PARA_SHAPE {
 	Int16 ParaBorder:OffsetBottom;
 
 	Bits:4 {
-		# TODO: 표 40
+		0~1 enum LineWrapType: Int LineWrap;
+		# 2~3: Reserved
+		4 Boolean AutoSpaceEAsianEng;
+		5 Boolean AutoSpaceEAsianNum;
 	}
+
+	# TODO_SOMETIME: 2007 이하에서 이게 없을까?
 	Bits:4 {
-		# TODO: 표 41
+		0~4 enum LineSpacingType: Int ParaMargin:LineSpacingType;
 	}
+	UInt32 ParaMargin:LineSpacing;
 }
 
 # 4.1.11 스타일
@@ -710,7 +718,7 @@ record STYLE {
 	WString Name;
 	WString EngName;
 	Bits:1 {
-		0~2 Int Type;
+		0~2 enum StyleType: Int Type;
 	}
 	Byte NextStyle;
 	Int16 LangId;
