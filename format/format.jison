@@ -119,6 +119,10 @@
 				code += genEnum(vname, simple.enum);
 				code += offset.add(4);
 				return code;
+			case "WChar":
+				code = vname+"=String.fromCharCode(this.data.readUInt16LE("+offset.value+"));";
+				code += offset.add(2);
+				return code;
 			case "WString":
 				code = "tmp = this.data.readUInt16LE("+offset.value+");";
 				code += offset.add(2) + offset.toObj();
@@ -389,7 +393,8 @@ type_bits_enum
 type_record
 	: Byte | Word | DWord
 	| WChar | WString
-	| HWPUnit | SHWPUnit
+	| HWPUnit {$$ = "UInt32";}
+	| SHWPUnit {$$ = "Int32";}
 	| UInt8 | UInt16 | UInt32
 	| Int8 | Int16 | Int32
 	| ColorRef

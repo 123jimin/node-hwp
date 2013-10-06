@@ -27,7 +27,19 @@ enum NumberType2 {
 	LatinSmall; CircledLatinCapital; CircledLatinSmall; HangulSyllable;
 	CircledHangulSyllable; HangulJamo; CircledHangulJamo;
 	HangulPhonetic; Ideograph; CircledIdeograph; DecagonCircle;
-	DecagonCircleHanja; Symbol; UserChar;
+	DecagonCircleHanja;
+	null; null; null; null; null;  null; null; null; null; null;
+	null; null; null; null; null;  null; null; null; null; null;
+	null; null; null; null; null;  null; null; null; null; null;
+	null; null; null; null; null;  null; null; null; null; null;
+	null; null; null; null; null;  null; null; null; null; null;
+	null; null; null; null; null;  null; null; null; null; null;
+	null; null; null; null; null;  null; null; null; null; null;
+	null; null; null; null; null;  null; null; null; null; null;
+	null; null; null; null; null;  null; null; null; null; null;
+	null; null; null; null; null;  null; null; null; null; null;
+	null; null; null; null; null;  null; null; null; null; null;
+	null; Symbol; UserChar;
 }
 enum AlignType1 {
 	Justify; Left; Right; Center; Distribute; DistributeSpace;
@@ -529,7 +541,7 @@ node P {
 	Boolean PageBreak default="false";
 	Boolean ColumnBreak default="false";
 }
-node Text {
+node TEXT {
 	Int CharShape;
 }
 
