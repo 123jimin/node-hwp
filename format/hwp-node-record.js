@@ -1,7 +1,7 @@
 /**
 *
 *  This code is generated from /format/hwp-node-record.js and
-*  /format/hwp.format via /generate.js with jison.
+*  /format/*.format via /generate.js with jison.
 *
 **/
 
