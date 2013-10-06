@@ -561,25 +561,25 @@ record BORDER_FILL {
 	Group LeftBorder {
 		enum LineType1: UInt8 Type;
 		enum LineWidth: UInt8 Width;
-		ColorRef value;
+		ColorRef Color;
 	}
 	Group RightBorder {
 		enum LineType1: UInt8 Type;
 		enum LineWidth: UInt8 Width;
-		ColorRef value;
+		ColorRef Color;
 	}
 	Group TopBorder {
 		enum LineType1: UInt8 Type;
 		enum LineWidth: UInt8 Width;
-		ColorRef value;
+		ColorRef Color;
 	}
 	Group BottomBorder {
 		enum LineType1: UInt8 Type;
 		enum LineWidth: UInt8 Width;
-		ColorRef value;
+		ColorRef Color;
 	}
 	Group Diagonal {
-		UInt8 Type;
+		enum LineType1: UInt8 Type;
 		enum LineWidth: UInt8 Width;
 		ColorRef Color;
 	}

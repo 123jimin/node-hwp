@@ -65,8 +65,13 @@ HWPNode.prototype.add = function add(elem){
 	this.setCount();
 };
 
-HWPNode.prototype.setAttr = function setAttr(attrs){
-	for(var name in attrs){
+HWPNode.prototype.setAttr = function setAttr(attrs, list){
+	if(list) list.forEach(function(name){
+		if(attrs[name] === undefined) console.warn("Warning: undefined attr %s", name);
+		if(this.attr[name] === undefined) console.warn("Warning: unexpected attr %s", name);
+		this.attr[name] = attrs[name];
+	}, this);
+	else for(var name in attrs){
 		if(this.attr[name] === undefined) console.warn("Warning: unexpected attr %s", name);
 		this.attr[name] = attrs[name];
 	}
