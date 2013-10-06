@@ -187,7 +187,7 @@
 				rootObj = o.value;
 			}
 		});
-		wc = RT+"={'record':{},'node':{},'tag':{},'enum':{}};\n"; RT += '.';
+		wc = "if(typeof "+RT+" === 'undefined')"+RT+"={'record':{},'node':{},'tag':{},'enum':{}};\n"; RT += '.';
 		wc += format.map(function(o){
 			var code = "";
 			if(o == null) return "// FIXME: null";

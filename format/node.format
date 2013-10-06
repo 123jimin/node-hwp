@@ -93,6 +93,69 @@ enum LineSpacingType {
 enum StyleType {
 	Para; Char;
 }
+enum ItemType {
+	Bstr; "Integer"; "Set"; "Array"; "BinData";
+}
+enum PageStartsOnType {
+	Both; Even; Odd;
+}
+enum GutterType {
+	LeftOnly; LeftRight; TopBottom;
+}
+enum NoteNumberingType {
+	Continuous; OnSection; OnPage;
+}
+# PageStartsOnType과 같으나 혹시 몰라 다시 적음
+enum PageBorderFillType {
+	Both; Even; Odd;
+}
+enum FillAreaType {
+	Paper; Page; Border;
+}
+# 역시 다시 적음
+enum MasterPageType {
+	Both; Even; Odd;
+}
+# VerAlignType과 다름
+enum VertAlignType {
+	Top; Center; Bottom;
+}
+enum ExtMasterPageType {
+	LastPage; OptionalPage;
+}
+enum ColDefType {
+	Newspaper; BalancedNewspaper; Parallel;
+}
+enum LayoutType {
+	Left; Right; Mirror;
+}
+enum PageBreakType {
+	Table; Cell; None;
+}
+enum NumberingType {
+	None; Figure; Table; Equation;
+}
+enum TextFlowType {
+	BothSides; LeftOnly; RightOnly; LargestOnly;
+}
+enum WidthRelToType {
+	Paper; Page; Column; Para; Absolute;
+}
+enum HeightRelToType {
+	Paper; Page; Absolute;
+}
+enum VertRelToType {
+	Paper; Page; Para;
+}
+enum VertAlignType {
+	Top; Center; Bottom; Inside; Outside;
+}
+enum HorzRelToType {
+	Paper; Page; Column; Para;
+}
+enum HorzAlignType {
+	Left; Center; Right; Inside; Outside;
+}
 
 # HWPML nodes
 # 3. 루트 엘리먼트
@@ -453,3 +516,231 @@ node MEMO {
 	# TODO: 타입 찾기
 	String MemoType;
 }
+
+# 5. 본문 엘리먼트
+node BODY {}
+node SECTION {
+	Int Id;
+}
+node P {
+	Int ParaShape;
+	Int Style;
+	Int InstId;
+	Boolean PageBreak default="false";
+	Boolean ColumnBreak default="false";
+}
+node Text {
+	Int CharShape;
+}
+
+# 5.1. 글자 엘리먼트
+node CHAR {
+	Int Style;
+}
+node MARKPENBEGIN {
+	Int Color;
+}
+node MARKPENEND {}
+node TITLEMARK {
+	Boolean Ignore;
+}
+node TAB {}
+node LINEBREAK {}
+# (SIC)
+node HYPEN {}
+node NBSPACE {}
+node FWSPACE {}
+
+# 5.2. 구역 정의 엘리먼트
+node SECDEF {
+	Int TextDirection default="0";
+	Int SpaceColumns;
+	# TODO: 글자 수일때에는?
+	Int TabStop default="8000";
+	Int OutlineShape default="1";
+	Int LineGrid default="0";
+	Int CharGrid default="0";
+	Boolean FirstBorder default="false";
+	Boolean FirstFill default="false";
+	Int ExtMasterpageCount default="0";
+	Int MemoShapeId;
+	# 우선 존재하는 값은 0임.
+	Int TextVerticalWidthHead;
+}
+node PARAMETERSET {
+	Int SetId;
+	Int Count;
+}
+node PARAMETERARRAY {
+	Int Count;
+}
+node ITEM {
+	Int ItemId;
+	enum ItemType Type;
+}
+
+# 5.2.1. 시작 번호 정보
+node STARTNUMBER {
+	enum PageStartsOnType PageStartsOn default="Both";
+	Int Page default="0";
+	Int Figure default="0";
+	Int Table default="0";
+	Int Equation default="0";
+}
+
+# 5.2.2. 감추기 정보
+node HIDE {
+	Boolean Header default="false";
+	Boolean Footer default="false";
+	Boolean MasterPage default="false";
+	Boolean Border default="false";
+	Boolean Fill default="false";
+	Boolean PageNumPos default="false";
+	Boolean EmptyLine default="false";
+}
+
+# 5.2.3. 용지 설정 정보
+node PAGEDEF {
+	Int Landscape default="0";
+	Int Width default="59528";
+	Int Height default="84188";
+	enum GutterType GutterType default="LeftOnly";
+}
+node PAGEMARGIN {
+	Int Left default="8504";
+	Int Right default="8504";
+	Int Top default="5668";
+	Int Bottom default="4252";
+	Int Header default="4252";
+	Int Footer default="4252";
+	Int Gutter default="0";
+}
+
+# 5.2.4. 각주/미주 모양 정보
+node FOOTNOTESHAPE {}
+node ENDNOTESHAPE {}
+node AUTONUMFORMAT {
+	enum NumberType2 Type default="Digit";
+	String UserChar;
+	String PrefixChar;
+	String SuffixChar default=")";
+	Boolean Superscript;
+}
+node NOTELINE {
+	String Length;
+	enum LineType1 Type default="Solid";
+	enum LineWidth Width default="0.12mm";
+	Int Color;
+}
+node NOTESPACING {
+	Int AboveLine;
+	Int BelowLine;
+	Int BetweenNotes;
+}
+node NOTENUMBERING {
+	enum NoteNumberingType Type default="Continuous";
+	# Type이 OnSection일 때에만 사용
+	Int NewNumber default="1";
+}
+node NOTEPLACEMENT {
+	# TODO: enum 어떻게 할지 결정하기
+	String Place;
+	Boolean BeneathText;
+}
+
+# 5.2.5. 쪽 테두리/배경 정보
+node PAGEBORDERFILL {
+	enum PageBorderFillType Type default="Both";
+	Int BorderFill;
+	Boolean TextBorder default="false";
+	Boolean HeaderInside default="false";
+	Boolean FooterInside default="false";
+	enum FillAreaType FillArea default="Paper";
+}
+node PAGEOFFSET {
+	Int Left default="1417";
+	Int Right default="1417";
+	Int Top default="1417";
+	Int Bottom default="1417";
+}
+
+# 5.2.6. 바탕쪽 정보
+node MASTERPAGE {
+	enum MasterPageType Type default="Both";
+	Int TextWidth;
+	Int TextHeight;
+	Boolean HasTextRef default="false";
+	Boolean HasNumRef default="false";
+}
+node PARALIST {
+	Int TextDirection default="0";
+	enum LineWrapType LineWrap default="Break";
+	enum VertAlignType VertAlign default="Top";
+	Int LinkListID;
+	Int LinkListIDNext;
+}
+
+# 5.2.7. 확장 바탕쪽 정보
+node EXT_MASTERPAGE {
+	enum ExtMasterPageType Type;
+	# Type이 OptionalPage일 때
+	Int PageNumber;
+	Boolean PageDuplicate;
+	Boolean PageFront;
+}
+
+# 5.3. 단 정의 정보
+node COLDEF {
+	enum ColDefType Type default="Newspaper";
+	Int Count default="1";
+	enum LayoutType Layout default="Left";
+	Boolean SameSize default="false";
+	Int SameGap default="0";
+}
+node COLUMNLINE {
+	enum LineType Type default="Solid";
+	enum LineWidth Width default="0.12mm";
+	Int Color;
+}
+node COLUMNTABLE {}
+node COLUMN {
+	Int Width;
+	Int Gap;
+}
+
+# 5.4. 표
+# 5.5. 그림
+# 5.6. 그리기 개체
+# 5.6.1. 선
+# 5.6.2. 사각형
+# 5.6.3. 타원
+# 5.6.4. 호
+# 5.6.5. 다각형
+# 5.6.6. 곡선
+# 5.6.7. 연결선
+# 5.7. Unknown Object
+# 5.8. 양식 객체
+# 5.8.1. 라디오 버튼
+# 5.8.2. 체크 버튼
+# 5.8.3. 콤보 박스
+# 5.8.4. 에디트
+# 5.8.5. 리스트 박스
+# 5.8.6. 스크롤바
+# 5.9. 묶음 객체
+# 5.10. OLE 객체
+# 5.11. 한글 97 수식
+# 5.12. 글맵시
+# 5.13. 필드 시작
+# 5.14. 필드 끝
+# 5.15. 책갈피
+# 5.16. 머리말, 꼬리말
+# 5.17. 각주, 미주
+# 5.18. 자동 번호, 새 번호
+# 5.19. 홀/짝수 조정
+# 5.20. 감추기
+# 5.21. 쪽번호 위치
+# 5.22. 찾아보기 표식
+# 5.23. 글자 겹침
+# 5.24. 덧말
+# 5.25. 숨은 설명
+# 6. 부가 정보 엘리먼트
