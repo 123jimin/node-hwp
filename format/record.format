@@ -404,7 +404,7 @@ record CTRL_DATA {}
 # 4.2.9.1. 표 개체
 record TABLE {
 	Bits:4 {
-		# TODO: PageBreakType
+		0~1 enum PageBreakType: Int PageBreak;
 		2 Boolean RepeatHeader;
 		# TODO_SOMETIME: 여기에 뭔가 있다.
 	}

@@ -168,6 +168,9 @@ enum HorzRelToType {
 enum HorzAlignType {
 	Left; Center; Right; Inside; Outside;
 }
+enum SideType {
+	Left; Right; Top; Bottom;
+}
 
 # HWPML nodes
 # 3. 루트 엘리먼트
@@ -426,7 +429,7 @@ node TABITEM {
 node NUMBERINGLIST {
 	Int Count;
 }
-node Numbering {
+node NUMBERING {
 	Int Id;
 	Int Start default="1";
 }
@@ -721,6 +724,98 @@ node COLUMN {
 }
 
 # 5.4. 표
+node TABLE {
+	enum PageBreakType PageBreak default="Cell";
+	Boolean RepeatHeader default="true";
+	Int RowCount;
+	Int ColCount;
+	Int CellSpacing default="0";
+	Int BorderFill;
+}
+node SHAPEOBJECT {
+	Int InstId;
+	Int ZOrder default="0";
+	enum NumberingType NumberingType default="None";
+	enum TextWrapType TextWrap;
+	enum TextFlowType TextFlow default="BothSides";
+	Boolean Lock default="false";
+}
+node SIZE {
+	Int Width;
+	Int Height;
+	enum WidthRelToType WidthRelTo default="Absolute";
+	enum HeightRelToType HeightRelTo default="Absolute";
+	Boolean Protect default="false";
+}
+node POSITION {
+	Boolean TreatAsChar;
+	Boolean AffectLSpacing default="false";
+	enum VertRelToType VertRelTo;
+	enum VertAlignType VertAlign;
+	enum HorzRelToType HorzRelTo;
+	enum HorzAlignType HorzAlign;
+	Int VertOffset;
+	Int HorzOffset;
+	Boolean FlowWithText default="false";
+	Boolean AllowOverlap default="false";
+	# 5.7.5.2992부터 추가된 속성
+	Boolean HoldAnchorAndSO default="false";
+}
+node OUTSIDEMARGIN {
+	# Table: 283, Equation: 56, Picture: 0, Drawing: 0, OLE: ?
+	Int Left;
+	Int Right;
+	Int Top;
+	Int Bottom;
+}
+node CAPTION {
+	enum SideType Side default="Left";
+	Boolean FullSize default="false";
+	Int Width;
+	Int Gap Default="850";
+	Int LastWidth;
+}
+node SHAPECOMMENT {}
+node INSIDEMARGIN {
+	# Table: 141, Picture: 0
+	Int Left;
+	Int Right;
+	Int Top;
+	Int Bottom;
+}
+node CELLZONELIST {
+	Int Count;
+}
+node CELLZONE {
+	Int StartRowAddr;
+	Int StartColAddr;
+	Int EndRowAddr;
+	Int EndColAddr;
+	Int BorderFill;
+}
+node ROW {}
+node CELL {
+	String Name;
+	Int ColAddr;
+	Int RowAddr;
+	Int ColSpan;
+	Int RowSpan;
+	Int Width;
+	Int Height;
+	Boolean Header default="false";
+	Boolean HasMargin default="false";
+	Boolean Protect default="false";
+	Boolean Editable default="false";
+	Boolean Dirty default="false";
+	Int BorderFill;
+}
+node CELLMARGIN {
+	Int Left;
+	Int Right;
+	Int Top;
+	Int Bottom;
+}
+
 # 5.5. 그림
 # 5.6. 그리기 개체
 # 5.6.1. 선
