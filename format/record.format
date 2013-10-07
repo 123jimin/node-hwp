@@ -382,7 +382,38 @@ record PARA_RANGE_TAG {
 # 4.2.6. 컨트롤 헤더
 record CTRL_HEADER {
 	# TODO: 적절한 이름 정하기
-	UInt32 ControlId;
+	4ChID Type;
+	Switch Type {
+		Case "secd" = "SecDef":
+			Group Hide;
+			Group StartNumber;
+			Bits:4 {
+				0 Boolean Hide:Header;
+				1 Boolean Hide:Footer;
+				2 Boolean Hide:MasterPage;
+				3 Boolean Hide:Border;
+				4 Boolean Hide:Fill;
+				5 Boolean Hide:PageNumPos;
+				8 Boolean FirstBorder;
+				9 Boolean FirstFill;
+				16~18 Int TextDirection;
+				19 Boolean Hide:EmptyLine;
+				20~21 enum PageStartsOnType: Int StartNumber:PageStartsOn;
+				# TODO: 22: 원고지 정서법 적용 여부
+			}
+			UInt16 SpaceColumns;
+			UInt16 LineGrid;
+			UInt16 CharGrid;
+			UInt32 TabStop;
+			UInt16 StartNumber:Page;
+			UInt16 StartNumber:Figure;
+			UInt16 StartNumber:Table;
+			UInt16 StartNumber:Equation;
+			# TODO: 뭔가 빠진 듯 한데
+			# TODO_SOMETIME: 뒤에 다른 설정 데이터가 같이 있나?
+		Else:
+			{{ console.warn("Warning [CTRL_HEADER]: not processing Control Type %s", this.attr.Type); }}
+	}
 }
 
 # 4.2.7. 문단 리스트 헤드
@@ -398,7 +429,8 @@ record LIST_HEADER {
 }
 
 # 4.2.8. 컨트롤 임의의 데이터
-record CTRL_DATA {}
+record CTRL_DATA {
+}
 
 # 4.2.9. 개체 공통 속성을 포함하는 컨트롤
 # 4.2.9.1. 표 개체
@@ -445,7 +477,6 @@ record EQEDIT {
 # 4.2.9.5. OLE 개체
 record SHAPE_COMPONENT_OLE {
 	# TODO
-	{{ console.log(data); }}
 }
 
 # 4.2.10.1.1. 용지 설정

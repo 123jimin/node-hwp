@@ -75,6 +75,22 @@
 		this.values = a;
 		this.type = 'Bits';
 	};
+	node.Switch = function Switch(e, o){
+		this.test = e;
+		this.cases = o;
+	};
+	node.Case = function Case(v1, v2, b){
+		this.value = v1;
+		this.new_value = v2;
+		this.body = b;
+	};
+	node.Cases = function Cases(vs, b){
+		this.values = vs;
+		this.body = b;
+	};
+	node.Else = function Else(b){
+		this.body = b;
+	};
 	node.Script = function Script(s){
 		this.script = s;
 	};
@@ -124,9 +140,9 @@
 				code += offset.add(2);
 				return code;
 			case "WString":
-				code = "tmp = this.data.readUInt16LE("+offset.value+");";
+				code = "tmp=this.data.readUInt16LE("+offset.value+");";
 				code += offset.add(2) + offset.toObj();
-				code += " for("+vname+"='';tmp-->0;){";
+				code += "for("+vname+"='';tmp-->0;){";
 				code += vname+"+=String.fromCharCode(this.data.readUInt16LE("+offset.value+"));"+offset.add(2);
 				code += "}";
 				return code;
@@ -134,9 +150,14 @@
 				code = vname+"=this.data.readUInt32LE("+offset.value+");";
 				code += offset.add(4);
 				return code;
+			case "4ChID":
+				code += "tmp=this.data.readUInt32LE("+offset.value+");";
+				code += vname+"=String.fromCharCode(tmp>>24,tmp>>16&0xFF,tmp>>8&0xFF,tmp&0xFF);";
+				code += offset.add(4);
+				return code;
 			case "Bits":
 				if(simple.name){
-					code += "this.attr."+simple.name+" = {}; ";
+					code += "this.attr."+simple.name+"={};";
 					base += '.'+simple.name;
 				}
 				code += "tmp=this.data.slice("+offset.value+","+offset.plus(simple.length)+");";
@@ -181,6 +202,70 @@
 				return code;
 			default: return "// FIXME: unprocessed simple type: "+simple.type;
 		}
+	};
+
+	var recordCode = function(RT, base, element, offset){
+		var c;
+		if(element instanceof node.SimpleType
+			|| element instanceof node.Bits
+			|| element instanceof node.Comment){
+			return simpleTypeCode(RT, base, element, offset);
+		}
+		if(element instanceof node.Group){
+			if(!element.defined) c = base+"."+element.name+" = {};\n\t";
+			c += element.values.map(function(e){
+				return recordCode(RT, base+"."+element.name, e, offset);
+			}).join('\n\t');
+			return c;
+		}
+		if(element instanceof node.Array){
+			c = base+"."+element.name+"=[];"+offset.toObj()+"\n";
+			c += "\tfor(tmp=0;tmp<"+element.length+";tmp++){\n";
+			c += "\t\t"+base+"."+element.name+"[tmp] = {};\n";
+			c += "\t\t"+element.type.map(function(e){
+				return recordCode(RT, base+"."+element.name+"[tmp]", e, offset);
+			}).join('\n\t\t')+"\n";
+			c += "\t}";
+			return c; 
+		}
+		if(element instanceof node.Script){
+			c = offset.toObj()+element.script.trim();
+			return c;
+		}
+		if(element instanceof node.ByteStream){
+			c = base+"."+element.name+"=this.data.slice("+offset.value+","+offset.plus(element.length)+");";
+			c += offset.add(element.length);
+			return c;
+		}
+		if(element instanceof node.Switch){
+			c = offset.toObj()+"switch("+base+"."+element.test+"){\n\t";
+			c += element.cases.map(function(cs){
+				var cc;
+				if(cs instanceof node.Case){
+					cc = "case \""+cs.value+"\":";
+					cc += base+"."+element.test+"=\""+cs.new_value+"\";";
+					cc += cs.body.map(function(e){
+						return '\n\t'+recordCode(RT, base, e, offset);
+					}).join('');
+					cc += "\n\tbreak;";
+					return cc;
+				}
+				if(cs instanceof node.Cases){
+					throw new Error("Not yet implemented!");
+				}
+				if(cs instanceof node.Else){
+					cc = "default:";
+					cc += cs.body.map(function(e){
+						return '\n\t'+recordCode(RT, base, e, offset);
+					});
+					return cc;
+				}
+				return "/* FIXME: unprocessed type ("+cs.constructor.name+") */";
+			}).join('\n\t');
+			c += "\n\t}";
+			return c;
+		}
+		return "// FIXME: unprocessed type ("+element.constructor.name+")";
 	};
 
 	var generateCode = function(format){
@@ -245,39 +330,7 @@
 				code += RT+"record."+o.name+" = function Record_"+o.name+"(data){\n";
 				code += "\tvar tmp; this.attr = {}; this.data = data; this.name = \""+o.name+"\";\n";
 				code += o.schema.map(function(element){
-					var c;
-					if(element instanceof node.SimpleType
-						|| element instanceof node.Bits
-						|| element instanceof node.Comment){
-						return simpleTypeCode(RT, "this.attr", element, offset);
-					}
-					if(element instanceof node.Group){
-						if(!element.defined) c = "this.attr."+element.name+" = {};\n\t";
-						c += element.values.map(function(e){
-							return simpleTypeCode(RT, "this.attr."+element.name, e, offset);
-						}).join('\n\t');
-						return c;
-					}
-					if(element instanceof node.Array){
-						c = "this.attr."+element.name+" = [];"+offset.toObj()+"\n";
-						c += "\tfor(tmp=0;tmp<"+element.length+";tmp++){\n";
-						c += "\t\tthis.attr."+element.name+"[tmp] = {};\n";
-						c += "\t\t"+element.type.map(function(e){
-							return simpleTypeCode(RT, "this.attr."+element.name+"[tmp]", e, offset);
-						}).join('\n\t\t')+"\n";
-						c += "\t}";
-						return c; 
-					}
-					if(element instanceof node.Script){
-						c = offset.toObj()+element.script.trim();
-						return c;
-					}
-					if(element instanceof node.ByteStream){
-						c = "this.attr."+element.name+" = this.data.slice("+offset.value+","+offset.plus(element.length)+");";
-						c += offset.add(element.length);
-						return c;
-					}
-					return "// FIXME: unprocessed type ("+element.constructor.name+")";
+					return recordCode(RT, 'this.attr', element, offset);
 				}).map(function(s){return '\t'+s+'\n';}).join('');
 				code += "};";
 				return code;
@@ -327,11 +380,17 @@
 "Int16"	return "Int16";
 "Int32"	return "Int32";
 "ColorRef"	return "ColorRef";
+"4ChID"	return "FChID";
 
 "ByteStream"	return "ByteStream";
 "Bits"	return "Bits";
 "Group"	return "Group";
 "GroupAdd"	return "SimpleGroup";
+
+"Switch"	return "SWITCH";
+"Case"	return "CASE";
+"Cases"	return "CASES";
+"Else"	return "ELSE";
 
 "record"	return "RECORD";
 "type"	return "TYPE";
@@ -369,6 +428,11 @@ _label
 	| _token {$$ = $1;}
 	;
 
+token_list
+	: _token token_list {$$ = [$1].concat($2);}
+	| _token {$$ = [$1];}
+	;
+
 type_enum
 	: ENUM TOKEN {$$ = $2;}
 	;
@@ -397,7 +461,7 @@ type_record
 	| SHWPUnit {$$ = "Int32";}
 	| UInt8 | UInt16 | UInt32
 	| Int8 | Int16 | Int32
-	| ColorRef
+	| ColorRef | FChID
 	;
 
 type_record_enum
@@ -474,8 +538,7 @@ def_node_element_options
 	;
 
 def_node_element_option
-	: TOKEN "=" TOKEN {$$ = [$1, $3];}
-	| TOKEN "=" QUOTED_STRING {$$ = [$1, $3.slice(1,-1)];}
+	: _token "=" _token {$$ = [$1, $3];}
 	;
 
 def_tag
@@ -503,6 +566,7 @@ def_record_element
 	| def_record_array {$$ = $1;}
 	| def_record_bytestream {$$ = $1;}
 	| def_record_bits {$$ = $1;}
+	| def_record_switch {$$ = $1;}
 	| COMMENT {$$ = new node.Comment($1);}
 	;
 
@@ -546,4 +610,19 @@ def_record_bits_element
 	: INTEGER type_bits_enum _label LINE_END {$$ = new node.BitsType($1, $1, $2.value, $2.enum, $3);}
 	| INTEGER "~" INTEGER type_bits_enum _label LINE_END {$$ = new node.BitsType($1, $3, $4.value, $4.enum, $5);}
 	| COMMENT {$$ = new node.Comment($1);}
+	;
+
+def_record_switch
+	: SWITCH _label P_OPEN def_record_switch_inner P_CLOSE {$$ = new node.Switch($2, $4);}
+	;
+
+def_record_switch_inner
+	: def_record_switch_element def_record_switch_inner {$$ = [$1].concat($2);}
+	| def_record_switch_element {$$ = [$1];}
+	;
+def_record_switch_element
+	: CASE _token "=" _token ":" def_record_inner {$$ = new node.Case($2, $4, $6);}
+	| CASE _token ":" def_record_inner {$$ = new node.Case($2, $2, $4);}
+	| CASES token_list ":" def_record_inner {$$ = new node.Cases($2, $4);}
+	| ELSE ":" def_record_inner {$$ = new node.Else($3);}
 	;

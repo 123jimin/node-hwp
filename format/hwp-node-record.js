@@ -5,6 +5,15 @@
 *
 **/
 
+var bufferToString = function(buffer){
+	for(var i=0,s='',t;i<buffer.length;i++){
+		t = buffer[i].toString(16).toUpperCase();
+		if(t.length<2) t='0'+t;
+		s += (i?' '+t:t);
+	}
+	return s;
+};
+
 var root;
 // CODE //
 
@@ -143,7 +152,7 @@ var HWPRecord = function HWPRecord(){};
 
 HWPRecord.prototype.toString = function(){
 	var toStr = function toStr(obj, t){
-		var s = t + obj.name;
+		var s = t + obj.name + ' | ' + bufferToString(obj.data);
 		if(obj.children) obj.children.forEach(function(o){
 			s += '\n'+toStr(o, t+'\t');
 		});
