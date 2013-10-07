@@ -87,7 +87,7 @@ record BIN_DATA {
 	UInt16 Property;
 }
 
-# 4.1.4. 글꼴 (TODO: 직접 데이터 처리해야 됨)
+# 4.1.4. 글꼴
 record FACE_NAME {
 	Bits:1 {
 		# 문서에 없음
@@ -218,7 +218,20 @@ record CHAR_SHAPE{
 
 # 4.1.7 탭 정의
 record TAB_DEF {
-	# TODO
+	Bits:4 {
+		0 Boolean AutoTabLeft;
+		1 Boolean AutoTabRight;
+	}
+	# TODO: count 자세히 확인
+	Int16 _count;
+	{{ if(this.attr._count){ }}
+	Group TabItem {
+		UInt32 Pos;
+		enum TabItemType: UInt8 Type;
+		# TODO: LineType1? LineType2?
+		enum LineType2: UInt8 Leader;
+	}
+	{{ } }}
 }
 
 # 4.1.8 문단 번호
@@ -388,6 +401,52 @@ record LIST_HEADER {
 record CTRL_DATA {}
 
 # 4.2.9. 개체 공통 속성을 포함하는 컨트롤
+# 4.2.9.1. 표 개체
+record TABLE {
+	Bits:4 {
+		# TODO: PageBreakType
+		2 Boolean RepeatHeader;
+		# TODO_SOMETIME: 여기에 뭔가 있다.
+	}
+	UInt16 RowCount;
+	UInt16 ColCount;
+	UInt16 CellSpacing;
+	# TODO
+}
+
+# 4.2.9.2. 그리기 개체
+# 4.2.9.2.1. 개체 요소
+record SHAPE_COMPONENT {
+	# TODO
+}
+
+# TODO: 그리기 개체
+
+# 4.2.9.3. 한글 스크립트 수식 (한글 97 방식 수식)
+record EQEDIT {
+	Bits:4 {
+		0 Boolean LineMode;
+	}
+	Group Script {
+		WString value;
+	}
+	UInt32 BaseUnit;
+	ColorRef TextColor;
+	Int16 BaseLine;
+	# TODO_SOMETIME: 이것 뜻 찾기
+	Int16 _unknown;
+	# 문서에 없는 것
+	WString Version;
+}
+
+# 4.2.9.4. 그림 개체
+# TODO
+
+# 4.2.9.5. OLE 개체
+record SHAPE_COMPONENT_OLE {
+	# TODO
+	{{ console.log(data); }}
+}
 
 # 4.2.10.1.1. 용지 설정
 record PAGE_DEF {
@@ -452,3 +511,5 @@ record PAGE_BORDER_FILL {
 	}
 	UInt16 BorderFill;
 }
+
+
