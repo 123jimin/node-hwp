@@ -251,7 +251,7 @@ record PARA_SHAPE {
 	Bits:4 {
 		# LineSpacingType이 2개 있음. (2007 이하, 초과)
 		0~1 enum LineSpacingType: Int ParaMargin:LineSpacingType;
-		2~4 enum AlignType1: Int Align;
+		2~4 enum AlignmentType1: Int Align;
 		5~6 enum BreakLatinWordType: Int BreakLatinWord;
 		# HML에서 true / false로 구분
 		7 Boolean BreakNonLatinWord;

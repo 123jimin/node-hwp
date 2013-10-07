@@ -41,11 +41,20 @@ enum NumberType2 {
 	null; null; null; null; null;  null; null; null; null; null;
 	null; Symbol; UserChar;
 }
-enum AlignType1 {
+enum AlignmentType1 {
 	Justify; Left; Right; Center; Distribute; DistributeSpace;
 }
-enum AlignType2 {
+enum AlignmentType2 {
 	Left; Center; Right;
+}
+enum ArrowType {
+	Normal; Arrow; Spear; ConcaveArrow; EmptyDiamond; EmptyCircle;
+	EmptyBox; FilledDiamond; FilledCircle; FilledBox;
+}
+enum ArrowSize {
+	SmallSmall; SmallMedium; SmallLarge;
+	MediumSmall; MediumMedium; MediumLarge;
+	LargeSmall; LargeMedium; LargeLarge;
 }
 enum LangType {
 	Hangul; Latin; Hanja; Japanese; Other; Symbol; User;
@@ -63,6 +72,15 @@ enum LineWrapType {
 }
 enum TextWrapType {
 	Square; Tight; Through; TopAndBottom; BehindText; InFrontText;
+}
+enum FieldType {
+	Clickhere; Hyperlink; Bookmark; Formula; Summery; UserInfo;
+	Date; DocDate; Path; Crossref; Mailmerge; Memo; RevisionChange;
+	RevisionSign; RevisionDelete; RevisionAttach; RevisionClipping;
+	RevisionSawtooth; RevisionThinking; RevisionPraise; RevisionLine;
+	RevisionSimpleChange; RevisionHyperlink; RevisionLineAttach;
+	RevisionLineLink; RevisionLineTransfer; RevisionRightmove;
+	RevisionLeftmove; RevisionTransfer; RevisionSplit;
 }
 
 # Implict enum
@@ -170,6 +188,37 @@ enum HorzAlignType {
 }
 enum SideType {
 	Left; Right; Top; Bottom;
+}
+enum EndCapType {
+	Round; Flat;
+}
+enum OutlineStyleType {
+	Normal; Outer; Inner;
+}
+enum ArcType {
+	Normal; Pie; Chord;
+}
+enum SegmentType {
+	Line; Curve;
+}
+enum ObjetType {
+	Unknown; Embedded; Link; Static; Equation;
+}
+enum DrawAspectType {
+	Content; ThumbNail; Icon; DocPrint;
+}
+enum AlignType {
+	Left; Right; Center; Full; Table;
+}
+enum PosType {
+	None;
+	TopLeft; TopCenter; TopRight;
+	BottomLeft; BottomCenter; BottomRight;
+	OutsideTop; OutsideBottom;
+	InsideTop; InsideBottom;
+}
+enum TargetProgramType {
+	None; Hwp70; "Word";
 }
 
 # HWPML nodes
@@ -435,7 +484,7 @@ node NUMBERING {
 }
 node PARAHEAD {
 	Int Level;
-	enum AlignType2 Alignment default="Left";
+	enum AlignmentType2 Alignment default="Left";
 	Boolean UseInstWidth default="true";
 	Boolean AutoIndent default="true";
 	Int WidthAdjust default="0";
@@ -798,8 +847,8 @@ node CELL {
 	String Name;
 	Int ColAddr;
 	Int RowAddr;
-	Int ColSpan;
-	Int RowSpan;
+	Int ColSpan default="1";
+	Int RowSpan default="1";
 	Int Width;
 	Int Height;
 	Boolean Header default="false";
@@ -810,44 +859,451 @@ node CELL {
 	Int BorderFill;
 }
 node CELLMARGIN {
-	Int Left;
-	Int Right;
-	Int Top;
-	Int Bottom;
+	Int Left default="0";
+	Int Right default="0";
+	Int Top default="0";
+	Int Bottom default="0";
 }
 
 # 5.5. 그림
+node PICTURE {
+	Boolean Reverse default="false";
+}
+node SHAPECOMPONENT {
+	# TODO: 타입 찾기
+	String HRef;
+	Int XPos default="0";
+	Int YPos default="0";
+	Int GroupLevel default="0";
+	Int OriWidth;
+	Int OriHeight;
+	Int CurWidth;
+	Int CurHeight;
+	Boolean HorzFlip default="false";
+	Boolean VertFlip default="false";
+	# TODO: 정말 Int인지 확인하기
+	Int InstID;
+}
+node ROTATIONINFO {
+	Int Angle default="0";
+	# 기본값: 개체 가운데점
+	Int CenterX;
+	Int CenterY;
+}
+node RENDERINGINFO {}
+node TRANSMATRIX {
+	Int E1; Int E2; Int E3;
+	Int E4; Int E5; Int E6;
+}
+node SCAMATRIX {
+	Int E1; Int E2; Int E3;
+	Int E4; Int E5; Int E6;
+}
+node ROTMATRIX {
+	Int E1; Int E2; Int E3;
+	Int E4; Int E5; Int E6;
+}
+node LINESHAPE {
+	Int Color;
+	Int Width;
+	enum LineType1 Style default="Solid";
+	enum EndCapStyle EndCap default="Flat";
+	enum ArrowType HeadStyle default="Normal";
+	enum ArrowType TailStyle default="Normal";
+	enum ArrowSize HeadSize default="SmallSmall";
+	enum ArrowSize TailSize default="SmallSmall";
+	enum OutlineStyleType OutlineStyle default="Normal";
+	Int Alpha;
+}
+node IMAGERECT {
+	Int X0; Int Y0;
+	Int X1; Int Y1;
+	Int X2; Int Y2;
+}
+node IMAGECLIP {
+	Int Left;
+	Int Top;
+	Int Right;
+	Int Bottom;
+}
+node EFFECTS {}
+node SHADOWEFFECT {
+	# TODO
+}
+node GLOW {
+	Int Alpha;
+	Int Radius;
+}
+node SOFTEDGE {
+	Int Radius;
+}
+node REFLECTION {
+	# TODO
+}
+node EFFECTSCOLOR {
+	# TODO
+}
+node COLOREFFECT {
+	# TODO
+}
+
 # 5.6. 그리기 개체
+node DRAWINGOBJECT {}
+node DRAWTEXT {
+	Int LastWidth;
+	String Name;
+	Boolean Editable default="false";
+}
+node TEXTMARGIN {
+	Int Left default="238";
+	Int Right default="238";
+	Int Top default="238";
+	Int Bottom default="238";
+}
+
 # 5.6.1. 선
+node LINE {
+	Int StartX; Int StartY;
+	Int EndX; Int EndY;
+	Boolean IsReverseHV default="false";
+}
+
 # 5.6.2. 사각형
+node RECTANGLE {
+	Int Ratio;
+	Int X0; Int Y0;
+	Int X1; Int Y1;
+	Int X2; Int Y2;
+}
+
 # 5.6.3. 타원
+node ELLIPSE {
+	Boolean IntervalDirty default="false";
+	Boolean HasArcProperty default="false";
+	enum ArcType ArcType default="Normal";
+	Int CenterX; Int CenterY;
+	Int Axis1X; Int Axis1Y;
+	Int Axis2X; Int Axis2Y;
+	Int Start1X; Int Start1Y;
+	Int End1X; Int End1Y;
+	Int Start2X; Int Start2Y;
+	Int End2x; Int End2Y;
+}
+
 # 5.6.4. 호
+node ARC {
+	# 위 타원과 같은 enum?
+	enum ArcType Type default="Normal";
+	Int CenterX; Int CenterY;
+	Int Axis1X; Int Axis1Y;
+	Int Axis2X; Int Axis2Y;
+}
+
 # 5.6.5. 다각형
+node POLYGON {}
+node POINT {
+	Int X; Int Y;
+}
+
 # 5.6.6. 곡선
+node CURVE {}
+node SEGMENT {
+	enum SegmentType Type default="Curve";
+	Int X1; Int Y1; Int X2; Int Y2;
+}
+
 # 5.6.7. 연결선
+node CONNECTLINE {
+	# TODO_SOMETIME: 타입 찾기
+	String Type;
+	Int StartX; Int StartY;
+	Int EndX; Int EndY;
+	Int StartSubjectID;
+	Int StartSubjectIndex;
+	Int EndSubjectID;
+	Int EndSubjectIndex;
+}
+
 # 5.7. Unknown Object
+node UNKNOWNOBJECT {
+	Int Ctrlid; # TODO_SOMETIME: CtrlId인지 확인하기
+	Int X0; Int Y0;
+	Int X1; Int Y1;
+	Int X2; Int Y2;
+	Int X3; Int Y3;
+}
+
 # 5.8. 양식 객체
+node FORMOBJECT {
+	String Name;
+	Int ForeColor;
+	Int BackColor;
+	String GroupName;
+	Boolean TabStop default="true";
+	# TODO: 타입 찾기
+	String TabOrder;
+	Boolean Enabled default="true";
+	Int BorderType default="0";
+	Boolean DrawFrame default="true";
+	Boolean Printable default="true";
+}
+node FORMCHARSHAPE {
+	Int CharShape default="0";
+	Boolean FollowContext default="false";
+	Boolean AutoSize default="false";
+	Boolean WordWrap default="false";
+}
+node BUTTONSET {
+	# TODO: 타입 다 찾기
+	String Caption;
+	String Value;
+	String RadioGroupName;
+	Boolean TriState;
+	String BackStyle;
+}
+
 # 5.8.1. 라디오 버튼
+node RADIOBUTTON {}
+
 # 5.8.2. 체크 버튼
+node CHECKBUTTON {}
+
 # 5.8.3. 콤보 박스
+node COMBOBOX {
+	Int ListBoxRows;
+	Int ListBoxWidth;
+	String Text;
+	# TODO: 정말 Boolean인지 확인하기
+	Boolean EditEnable;
+}
+
 # 5.8.4. 에디트
+node EDIT {
+	# TODO: 타입 다 찾기
+	String MultiLine;
+	String PasswordChar;
+	Int MaxLength;
+	Boolean ScrollBars;
+	String TabKeyBehavior;
+	# 아래 두 개는 Boolean 확실함.
+	Boolean Number;
+	Boolean ReadOnly;
+	String AlignText;
+}
+node EDITTEXT {}
+
 # 5.8.5. 리스트 박스
+node LISTBOX {
+	# TODO
+}
+
 # 5.8.6. 스크롤바
+node SCROLLBAR {
+	# TODO
+}
+
 # 5.9. 묶음 객체
+node CONTAINER {}
+
 # 5.10. OLE 객체
+node OLE {
+	# 오타 아님!
+	enum ObjetType ObjetType;
+	Int ExtentX; Int ExtentY;
+	Int BinItem;
+	enum DrawAspectType DrawAspect;
+	Boolean HasMoniker default="false";
+	Int EqBaseLine;
+}
+
 # 5.11. 한글 97 수식
+node EQUATION {
+	Boolean LineMode default="false";
+	Int BaseUnit default="1000";
+	Int TextColor default="0";
+	Int BaseLine;
+	String Version;
+}
+node SCRIPT {}
+
 # 5.12. 글맵시
+node TEXTART {
+	String Text;
+	Int X0; Int Y0;
+	Int X1; Int Y1;
+	Int X2; Int Y2;
+	Int X3; Int Y3;
+}
+node TEXTARTSHAPE {
+	String FontName;
+	# TODO_SOMETIME: enum 찾기
+	String FontStyle default="Regular";
+	# TODO: enum 정하기 (htf?)
+	String FontType default="ttf";
+	Int TextShape default="0";
+	Int LineSpacing default="120";
+	Int CharSpacing default="100";
+	enum AlignType Align default="Left";
+}
+node OUTLINEDATA {
+	Int Count;
+}
+
 # 5.13. 필드 시작
+node FILEDBEGIN {
+	enum FieldType Type;
+	String Name;
+	Int InstId;
+	Boolean Editable default="true";
+	Boolean Dirty default="false";
+	# TODO_SOMETIME: 타입 찾기
+	String Property;
+	String Command;
+}
+
 # 5.14. 필드 끝
+node FIELDEND {
+	enum FieldType Type;
+	Boolean Editable default="true";
+	# TODO_SOMETIME: 타입 찾기
+	String Property;
+}
+
 # 5.15. 책갈피
+node BOOKMARK {
+	String Name;
+}
+
 # 5.16. 머리말, 꼬리말
+node HEADER {
+	# TODO
+}
+node FOOTER {
+	# TODO
+}
+
 # 5.17. 각주, 미주
+node FOOTNOTE {}
+node ENDNOTE {}
+
 # 5.18. 자동 번호, 새 번호
+node AUTONUM {
+	# TODO
+}
+node NEWNUM {
+	# TODO
+}
+
 # 5.19. 홀/짝수 조정
+node PAGENUMCTRL {
+	enum PageStartsOnType PageStartsOn default="Both";
+}
+
 # 5.20. 감추기
+node PAGEHIDING {
+	Boolean HideHeader default="false";
+	Boolean HideFooter default="false";
+	Boolean HideMasterPage default="false";
+	Boolean HideBorder default="false";
+	Boolean HideFill default="false";
+	Boolean HidePageNum default="false";
+}
+
 # 5.21. 쪽번호 위치
+node PAGENUM {
+	enum PosType Pos default="TopLeft";
+	enum NumberType1 FormatType default="Digit";
+	# TODO: 타입 찾기
+	String SideChar;
+}
+
 # 5.22. 찾아보기 표식
+node INDEXMARK {}
+node KEYFIRST {}
+node KEYSECOND {}
+
 # 5.23. 글자 겹침
+node COMPOSE {
+	# TODO
+}
+node COMPCHARSHAPE {
+	Int ShapeID;
+}
+
 # 5.24. 덧말
+node DUTMAL {
+	# TODO
+}
+node MAINTEXT {}
+node SUBTEXT {}
+
 # 5.25. 숨은 설명
+node HIDDENCOMMENT {}
+
 # 6. 부가 정보 엘리먼트
+node TAIL {}
+node BINDATASTORAGE {}
+node BINDATA {
+	Int Id;
+	Int Size;
+	String Encoding default="Base64";
+	Boolean Compress default="true";
+}
+node SCRIPTCODE {
+	String Type default="JScript";
+	String Version;
+}
+node SCRIPTHEADER {}
+node SCRIPTSOURCE {}
+node PRESCRIPT {
+	Int Count;
+}
+node POSTSCRIPT {
+	Int Count;
+}
+node SCRIPTFUNCTION {}
+node XMLTEMPLATE {}
+node SCHEMA {}
+node INSTANCE {}
+node COMPATIBLEDOCUMENT {
+	enum TargetProgramType TargetProgram default="None";
+}
+node LAYOUTCOMPATIBILITY {
+	Boolean ApplyFontWeightToBold default="false";
+	Boolean UseInnerUnderline default="false";
+	Boolean FixedUnderlineWidth default="false";
+	Boolean DoNotApplyStrikeout default="false";
+	Boolean UseLowercaseStrikeout default="false";
+	Boolean ExtendLineheightToOffset default="false";
+	Boolean TreatQuotationAsLatin default="false";
+	Boolean DoNotAlignWhitespaceOnRight default="false";
+	Boolean DoNotAdjustWordInJustify default="false";
+	Boolean BaseCharUnitOnEAsian default="false";
+	Boolean BaseCharUnitOfIndentOnFirstChar default="false";
+	Boolean AdjustLineheightToFont default="false";
+	Boolean AdjustBaselineInFixedLinespacing default="false";
+	Boolean ExcludeOverlappingParaSpacing default="false";
+	Boolean ApplyNextspacingOfLastPara default="false";
+	Boolean ApplyAtLeastToPercent100Pct default="false";
+	Boolean DoNotApplyAutoSpaceEAsianEng default="false";
+	Boolean DoNotApplyAutoSpaceEAsianNum default="false";
+	Boolean AdjustParaBorderfillToSpacing default="false";
+	Boolean ConnectParaBorderfillOfEqualBorder default="false";
+	Boolean AdjustParaBorderOffsetWithBorder default="false";
+	Boolean ExtendLineheightToParaBorderOffset default="false";
+	Boolean ApplyParaBorderToOutside default="false";
+	Boolean BaseLinespacingOnLinegrid default="false";
+	Boolean ApplyCharSpacingToCharGrid default="false";
+	Boolean DoNotApplyGridInHeaderfooter default="false";
+	Boolean ExtendHeaderfooterToBody default="false";
+	Boolean AdjustEndnotePositionToFootnote default="false";
+	Boolean DoNotApplyImageEffect default="false";
+	Boolean DoNotApplyShapeComment default="false";
+	Boolean DoNotAdjustEmptyAnchorLine default="false";
+	Boolean OverlapBothAllowOverlap default="false";
+	Boolean DoNotApplyVertOffsetOfForward default="false";
+	Boolean ExtendVertLimitToPageMargins default="false";
+	Boolean DoNotHoldAnchorOfTable default="false";
+	Boolean DoNotFormattingAtBeneathAnchor default="false";
+	Boolean DoNotApplyExtensionCharCompose default="false";
+}
