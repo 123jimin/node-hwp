@@ -42,7 +42,8 @@ var escapeHTML = function(s){
 
 HWPNode.prototype.value = null;
 
-HWPNode.prototype.toHML = function(){
+HWPNode.prototype.toHML = function(verbose){
+	var nl = verbose? '\n': '';
 	var toHML = function toHML(obj, tab){
 		var i, e, hml = "";
 		if(obj.name == 'HWPML')
@@ -53,16 +54,16 @@ HWPNode.prototype.toHML = function(){
 			if(obj.attr[e] != undefined) hml += ' '+e+'="'+escapeHTML(obj.attr[e])+'"';
 		}
 		if(obj.children && obj.children.length > 0){
-			hml += '>\n';
+			hml += '>'+nl;
 			for(i=0;i<obj.children.length;i++){
-				hml += toHML(obj.children[i], tab+'  ');
+				hml += toHML(obj.children[i], verbose? tab+'  ': '');
 			}
 			if(obj.value) hml += escapeHTML(obj.value);
-			hml += tab+'</'+obj.name+'>\n';
+			hml += tab+'</'+obj.name+'>'+nl;
 		}else if(obj.value || obj.value === ''){
-			hml += '>'+escapeHTML(obj.value)+'</'+obj.name+'>\n';
+			hml += '>'+escapeHTML(obj.value)+'</'+obj.name+'>'+nl;
 		}else{
-			hml += '/>\n';
+			hml += '/>'+nl;
 		}
 		return hml;
 	};

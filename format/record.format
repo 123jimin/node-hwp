@@ -372,21 +372,21 @@ record PARA_TEXT {
 			if(tmp){
 				this.text.push({
 					'type': tmp,
-					'start': bi,
+					'start': bi/2,
 					'data': buf
 				});
 				tmp = 0;
 			}else{
 				this.text.push({
 					'type': 'text',
-					'start': bi,
+					'start': bi/2,
 					'data': buf
 				});
 			}
 			if(x){
 				this.text.push({
 					'type': x,
-					'start': i
+					'start': i/2
 				});
 				bi = i+2;
 			}else if(y){
@@ -412,13 +412,10 @@ record PARA_TEXT {
 					case 0: case 25: case 26: case 27: case 28: case 29:
 						/* Reserved */
 						break;
-					case 10:
-						buf.push(10);
-						break;
 					case 13:
 						/* TODO */
 						break;
-					case 24: case 30: case 31:
+					case 10: case 24: case 30: case 31:
 						flushBuffer(c);
 						break;
 					default:
@@ -463,6 +460,7 @@ record PARA_RANGE_TAG {
 record CTRL_HEADER {
 	# TODO: 적절한 이름 정하기
 	4ChID Type;
+	{{ this.attr.RawType = this.attr.Type; }}
 	Switch Type {
 		Case "secd" = "SecDef":
 			Group Hide;

@@ -6,7 +6,7 @@ const file = 'test_1';
 var test = function(ok){
 	hwp.open('./test/files/'+file+'.hwp', function(err, doc){
 		assert.ifError(err);
-		console.log(doc.toHML());
+		console.log(doc.toHML(true));
 		ok();
 	});
 };
