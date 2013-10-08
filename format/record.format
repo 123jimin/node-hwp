@@ -362,11 +362,91 @@ record PARA_HEADER {
 # 4.2.2. 문단의 텍스트
 record PARA_TEXT {
 	# 길이가 저장되지 않는 듯 함.
+	{{
+		var i, c, buf = [], bi = 0;
+		this.text = []; tmp = 0;
+		
+		var flushBuffer = (function(x){
+			var y = tmp;
+			if(buf.length == 0) return;
+			if(tmp){
+				this.text.push({
+					'type': tmp,
+					'start': bi,
+					'data': buf
+				});
+				tmp = 0;
+			}else{
+				this.text.push({
+					'type': 'text',
+					'start': bi,
+					'data': buf
+				});
+			}
+			if(x){
+				this.text.push({
+					'type': x,
+					'start': i
+				});
+				bi = i+2;
+			}else if(y){
+				bi = i+2;
+			}else{
+				bi = i;
+			}
+			buf = [];
+		}).bind(this);
+
+		for(i=0; i<this.data.length; i+=2){
+			c = this.data.readUInt16LE(i);
+			/* in extended? */
+			if(tmp){
+				/* Is closing? */
+				if(c == tmp){
+					flushBuffer();
+				}else{
+					buf.push(c);
+				}
+			}else{
+				switch(c){
+					case 0: case 25: case 26: case 27: case 28: case 29:
+						/* Reserved */
+						break;
+					case 10:
+						buf.push(10);
+						break;
+					case 13:
+						/* TODO */
+						break;
+					case 24: case 30: case 31:
+						flushBuffer(c);
+						break;
+					default:
+						if(c<32){
+							flushBuffer(); tmp = c;
+						}else{
+							buf.push(c);
+						}
+				}
+			}
+		}
+
+		flushBuffer();
+	}}
+	# Text 형식: type=text 또는 type=숫자, start는 시작 지점, data는 데이터
 }
 
 # 4.2.3. 문단의 글자 모양
 record PARA_CHAR_SHAPE {
-	# TODO: 직접 처리
+	{{
+		this.values = [];
+		for(tmp=0; tmp<this.data.length; tmp+=8){
+			this.values.push({
+				'start': this.data.readUInt32LE(tmp),
+				'charShape': this.data.readUInt32LE(tmp+4)
+			});
+		};
+	}}
 }
 
 # 4.2.4. 문단의 레이아웃
