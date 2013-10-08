@@ -252,7 +252,14 @@
 					return cc;
 				}
 				if(cs instanceof node.Cases){
-					throw new Error("Not yet implemented!");
+					cc = cs.values.map(function(s){
+						return "case \""+s+"\":"
+					}).join(' ');
+					cc += cs.body.map(function(e){
+						return '\n\t'+recordCode(RT, base, e, offset);
+					}).join('');
+					cc += "\n\tbreak;";
+					return cc;
 				}
 				if(cs instanceof node.Else){
 					cc = "default:";
