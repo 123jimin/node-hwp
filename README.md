@@ -3,7 +3,7 @@ node-hwp
 
 HWP 버전 5 문서를 여는 Node.js 라이브러리를 만드는 시도를 하는 중입니다.
 
-현재, 이 패키지는 제작중이며, 다른 프로젝트에서 사용 될 준비가 *전혀* 되어 있지 않습니다.
+현재, 이 패키지는 제작중이며, 다른 프로젝트에서 사용 될 준비가 **전혀** 되어 있지 않습니다.
 
 작업 중 목록
 ------------
@@ -25,4 +25,25 @@ HWP 버전 5 문서를 여는 Node.js 라이브러리를 만드는 시도를 하
 * Import / Export
 	* HWPML에서 읽어오는 기능 추가하기.
 	* HWP로 내보내는 기능 추가하기.
+* 기타
+	* PIL 라이센스와 충돌하지 않는 라이센스 고르기(?).
 
+API
+---
+우선 간단하게 다음과 같이 HWP 파일을 읽어와 HWPML로 출력할 수 있습니다.
+```js
+var hwp = require('hwp');
+hwp.open('file.hwp', function(e, doc){
+	console.log(doc.toHML());
+});
+```
+
+### `hwp.HWP`
+
+### `hwp.open`
+
+### `document._doc`
+
+### `document._hml`
+
+### `document._hwp_meta`
