@@ -33,17 +33,25 @@ API
 우선 간단하게 다음과 같이 HWP 파일을 읽어와 HWPML로 출력할 수 있습니다.
 ```js
 var hwp = require('hwp');
-hwp.open('file.hwp', function(e, doc){
+hwp.open('file.hwp', function(err, doc){
 	console.log(doc.toHML());
 });
 ```
 
+### `hwp.open(file, [type], callback)`
+주어진 경로로부터 HWP 문서를 읽습니다.
+
+__인자__
+
+* file : HWP 문서의 경로입니다.
+* type (선택) : HWP 문서가 저장된 형식입니다. 현재는 `hwp`만을 지원합니다.
+* callback(err, doc) : 콜백 함수입니다. 함수가 호출될 때에 첫 번째 인자에는 파일을 읽어올 때 발생한 에러 (있다면), 두 번째 인자에는 HWP 파일 객체가 대입됩니다.
+
 ### `hwp.HWP`
+HWP 문서를 나타내는 객체입니다. 아래와 같은 속성들이 있습니다.
 
-### `hwp.open`
+#### `_doc`
 
-### `document._doc`
+#### `_hml`
 
-### `document._hml`
-
-### `document._hwp_meta`
+#### `_hwp_meta`
