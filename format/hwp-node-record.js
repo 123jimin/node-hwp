@@ -228,4 +228,9 @@ root.record.getTree = function getTree(offset, buffer){
 	return records;
 };
 
+root.enum.get = function get(name, i){
+	if(root.enum[name][i]) return root.enum[name][i];
+	return i;
+};
+
 module.exports = root;

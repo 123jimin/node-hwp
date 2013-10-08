@@ -135,6 +135,12 @@ enum GutterType {
 enum NoteNumberingType {
 	Continuous; OnSection; OnPage;
 }
+enum FootNoteShapePlaceType {
+	EachColumn; MergedColumn; RightMostColumn;
+}
+enum EndNoteShapePlaceType {
+	EndOfDocument; EndOfSection;
+}
 # PageStartsOnType과 같으나 혹시 몰라 다시 적음
 enum PageBorderFillType {
 	Both; Even; Odd;
@@ -707,7 +713,7 @@ node NOTENUMBERING {
 	Int NewNumber default="1";
 }
 node NOTEPLACEMENT {
-	# TODO: enum 어떻게 할지 결정하기
+	# 부모에 따라 enum이 달라짐
 	String Place;
 	Boolean BeneathText;
 }

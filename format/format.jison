@@ -136,7 +136,8 @@
 				code += offset.add(4);
 				return code;
 			case "WChar":
-				code = vname+"=String.fromCharCode(this.data.readUInt16LE("+offset.value+"));";
+				code = vname+"=this.data.readUInt16LE("+offset.value+");";
+				code += "if("+vname+")"+vname+"=String.fromCharCode("+vname+");else "+vname+"=null;";
 				code += offset.add(2);
 				return code;
 			case "WString":
@@ -243,7 +244,7 @@
 				var cc;
 				if(cs instanceof node.Case){
 					cc = "case \""+cs.value+"\":";
-					cc += base+"."+element.test+"=\""+cs.new_value+"\";";
+					if(cs.value != cs.new_value) cc += base+"."+element.test+"=\""+cs.new_value+"\";";
 					cc += cs.body.map(function(e){
 						return '\n\t'+recordCode(RT, base, e, offset);
 					}).join('');

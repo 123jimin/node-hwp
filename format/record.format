@@ -459,10 +459,10 @@ record PARA_RANGE_TAG {
 # 4.2.6. 컨트롤 헤더
 record CTRL_HEADER {
 	# TODO: 적절한 이름 정하기
-	4ChID Type;
-	{{ this.attr.RawType = this.attr.Type; }}
-	Switch Type {
-		Case "secd" = "SecDef":
+	4ChID _Type;
+	Switch _Type {
+		Case "secd":
+			# Section Definition
 			Group Hide;
 			Group StartNumber;
 			Bits:4 {
@@ -483,6 +483,7 @@ record CTRL_HEADER {
 			UInt16 LineGrid;
 			UInt16 CharGrid;
 			UInt32 TabStop;
+			# TODO: Page 기본값은 0? 1?
 			UInt16 StartNumber:Page;
 			UInt16 StartNumber:Figure;
 			UInt16 StartNumber:Table;
@@ -490,8 +491,9 @@ record CTRL_HEADER {
 			# TODO: 뭔가 빠진 듯 한데
 			# TODO_SOMETIME: 뒤에 다른 설정 데이터가 같이 있나?
 		Else:
-			{{ console.warn("Warning [CTRL_HEADER]: not processing Control Type %s", this.attr.Type); }}
+			{{ console.warn("Warning [CTRL_HEADER]: not processing Control Type '%s'", this.attr._Type); }}
 	}
+	{{ this.type = this.attr._Type; delete this.attr._Type; }}
 }
 
 # 4.2.7. 문단 리스트 헤드
@@ -585,7 +587,7 @@ record FOOTNOTE_SHAPE {
 	Group NotePlacement;
 	Bits:4 {
 		0~7 enum NumberType2: Int AutoNumFormat:Type;
-		# TODO: enum 어떻게 할지 결정하기
+		# 각주인지 미주인지에 따라 달라짐!
 		8~9 Int NotePlacement:Place;
 		10~11 enum NoteNumberingType: Int NoteNumbering:Type;
 		12 Boolean AutoNumFormat:Superscript;
@@ -595,7 +597,8 @@ record FOOTNOTE_SHAPE {
 	WChar AutoNumFormat:PrefixChar;
 	WChar AutoNumFormat:SuffixChar;
 	UInt16 NoteNumbering:NewNumber;
-	UInt16 NoteLine:Length;
+	# 문서가 틀림!
+	UInt32 NoteLine:Length;
 	UInt16 NoteSpacing:AboveLine;
 	UInt16 NoteSpacing:BelowLine;
 	UInt16 NoteSpacing:BetweenNotes;
