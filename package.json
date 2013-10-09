@@ -11,10 +11,10 @@
 		"url": "https://github.com/123jimin/node-hwp.git"
 	},
 	"dependencies": {
-		"async": "~0.2.9",
 		"ole-doc": "*"
 	},
 	"devDependencies": {
+		"async": "~0.2.9",
 		"jison": "~0.4.13"
 	},
 	"scripts": {
