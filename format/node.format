@@ -494,7 +494,8 @@ node PARAHEAD {
 	Boolean UseInstWidth default="true";
 	Boolean AutoIndent default="true";
 	Int WidthAdjust default="0";
-	enum TextOffsetType TextOffset default="50";
+	enum TextOffsetType TextOffsetType default="percent";
+	Int TextOffset default="50";
 	enum NumberType1 NumFormat default="Digit";
 	Int CharShape;
 }

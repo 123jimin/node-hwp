@@ -205,6 +205,8 @@
 		}
 	};
 
+	var var_id = 0;
+
 	var recordCode = function(RT, base, element, offset){
 		var c;
 		if(element instanceof node.SimpleType
@@ -220,11 +222,12 @@
 			return c;
 		}
 		if(element instanceof node.Array){
+			var ind = 'ii'+var_id;
 			c = base+"."+element.name+"=[];"+offset.toObj()+"\n";
-			c += "\tfor(tmp=0;tmp<"+element.length+";tmp++){\n";
-			c += "\t\t"+base+"."+element.name+"[tmp] = {};\n";
+			c += "\tfor(var "+ind+"=0;"+ind+"<"+element.length+";"+ind+"++){\n";
+			c += "\t\t"+base+"."+element.name+"["+ind+"] = {};\n";
 			c += "\t\t"+element.type.map(function(e){
-				return recordCode(RT, base+"."+element.name+"[tmp]", e, offset);
+				return recordCode(RT, base+"."+element.name+"["+ind+"]", e, offset);
 			}).join('\n\t\t')+"\n";
 			c += "\t}";
 			return c; 

@@ -236,7 +236,20 @@ record TAB_DEF {
 
 # 4.1.8 문단 번호
 record NUMBERING {
-	# TODO
+	Array:7 ParaHeads {
+		Bits:4 {
+			0~1 enum AlignmentType2: Int Alignment;
+			2 Boolean UseInstWidth;
+			3 Boolean AutoIndent;
+			4 enum TextOffsetType: Int TextOffsetType;
+			5~8 enum NumberType1: Int NumFormat;
+		}
+		UInt16 WidthAdjust;
+		UInt16 TextOffset;
+		UInt32 CharShape;
+		WString value;
+	}
+	UInt16 Start;
 }
 
 # 4.1.9 글머리표
