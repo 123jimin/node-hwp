@@ -16,7 +16,7 @@ HWP 버전 5 문서를 여는 Node.js 라이브러리를 만드는 시도를 하
 	* BORDER_FILL에서 문서화가 잘 되지 않은 부분 (Gradation, WindowBrush 등) 데이터 읽기.
 	* CHAR_SHAPE에서 밑줄과 취소선 관련 내용 읽기.
 	* TAB_DEF 더 자세히 채워넣기.
-	* NUMBERING과 BULLET 완성하기.
+	* BULLET 완성하기.
 	* 기타 다른 빠진 곳 채워넣기.
 * Body
 	* PARA_LINE_SEG의 "더 이상의 자세한 설명은 생략한다" 부분 채워넣기.
