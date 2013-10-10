@@ -475,7 +475,7 @@ record CTRL_HEADER {
 	4ChID _Type;
 	# 개체 공통 속성 읽기
 	Switch _Type {
-		Cases "eqed":
+		Cases "eqed" "tbl ":
 			Group ShapeObject{
 				Group Size;
 				Group Position;
@@ -516,7 +516,7 @@ record CTRL_HEADER {
 			}
 	}
 	Switch _Type {
-		Case "eqed": # 아무 데이터도 없음.
+		Cases "eqed" "tbl ": # 아무 데이터도 없음.
 		Case "secd":
 			# Section Definition
 			Group Hide;
@@ -580,6 +580,7 @@ record CTRL_DATA {
 # 4.2.9.1. 표 개체
 record TABLE {
 	Bits:4 {
+		# TODO_SOMETIME: PageBreak값이 틀린 듯?
 		0~1 enum PageBreakType: Int PageBreak;
 		2 Boolean RepeatHeader;
 		# TODO_SOMETIME: 여기에 뭔가 있다.
@@ -587,7 +588,17 @@ record TABLE {
 	UInt16 RowCount;
 	UInt16 ColCount;
 	UInt16 CellSpacing;
-	# TODO
+	Group InsideMargin {
+		UInt16 Left;
+		UInt16 Right;
+		UInt16 Top;
+		UInt16 Bottom;
+	}
+	Array:RowCount RowSizes {
+		UInt16 value;
+	}
+	UInt16 BorderFill;
+	# TODO_SOMETIME: Valid Zone Info
 }
 
 # 4.2.9.2. 그리기 개체

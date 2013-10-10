@@ -223,8 +223,10 @@
 		}
 		if(element instanceof node.Array){
 			var ind = 'ii'+var_id;
+			var il = element.length;
+			if(typeof il == 'string') il = base+'.'+il;
 			c = base+"."+element.name+"=[];"+offset.toObj()+"\n";
-			c += "\tfor(var "+ind+"=0;"+ind+"<"+element.length+";"+ind+"++){\n";
+			c += "\tfor(var "+ind+"=0;"+ind+"<"+il+";"+ind+"++){\n";
 			c += "\t\t"+base+"."+element.name+"["+ind+"] = {};\n";
 			c += "\t\t"+element.type.map(function(e){
 				return recordCode(RT, base+"."+element.name+"["+ind+"]", e, offset);
