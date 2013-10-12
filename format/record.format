@@ -562,14 +562,14 @@ record CTRL_HEADER {
 
 # 4.2.7. 문단 리스트 헤드
 record LIST_HEADER {
-	# TODO: 적절한 이름 정하기
 	Int16 ParaCount;
 	Bits:4 {
 		0~2 Int TextDirection;
-		# TODO: 아래 두 개 적절한 이름 정하기
 		3~4 Int ParaLineBreak;
 		5~6 Int VertAlign;
 	}
+	# 다른 객체(예: CELL)들이 이 레코드를 이용해서 여러 정보를 담는 듯
+	{{ this.offset = offset.value; }}
 }
 
 # 4.2.8. 컨트롤 임의의 데이터
@@ -599,6 +599,31 @@ record TABLE {
 	}
 	UInt16 BorderFill;
 	# TODO_SOMETIME: Valid Zone Info
+}
+# LIST_HEADER가 앞에 있는 CELL
+record LIST_CELL {
+	# 문서에 설명이 없음!
+	Bits:2 {
+		0 Boolean HasMargin;
+		1 Boolean Protect;
+		2 Boolean Header;
+		3 Boolean Editable;
+		# TODO_SOMETIME: DIRTY?
+	}
+	UInt16 ColAddr;
+	UInt16 RowAddr;
+	UInt16 ColSpan;
+	UInt16 RowSpan;
+	UInt32 Width;
+	UInt32 Height;
+	Group CellMargin {
+		# TODO: 방향 확정짓기
+		UInt16 Left;
+		UInt16 Right;
+		UInt16 Top;
+		UInt16 Bottom;
+	}
+	UInt16 BorderFill;
 }
 
 # 4.2.9.2. 그리기 개체
