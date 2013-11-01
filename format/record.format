@@ -632,7 +632,35 @@ record SHAPE_COMPONENT {
 	# TODO
 }
 
-# TODO: 그리기 개체
+# 4.2.9.2.2. 선 개체
+record SHAPE_COMPONENT_LINE {
+	# TODO
+}
+
+# 4.2.9.2.3. 사각형 개체
+record SHAPE_COMPONENT_RECTANGLE {
+	# TODO
+}
+
+# 4.2.9.2.4. 타원 개체
+record SHAPE_COMPONENT_ELLIPSE {
+	# TODO
+}
+
+# 4.2.9.2.5. 다각형 개체
+record SHAPE_COMPONENT_POLYGON {
+	# TODO
+}
+
+# 4.2.9.2.6. 호 개체
+record SHAPE_COMPONENT_ARC {
+	# TODO
+}
+
+# 4.2.9.2.7. 곡선 개체
+record SHAPE_COMPONENT_CURVE {
+	# TODO
+}
 
 # 4.2.9.3. 한글 스크립트 수식 (한글 97 방식 수식)
 record EQEDIT {
@@ -652,10 +680,18 @@ record EQEDIT {
 }
 
 # 4.2.9.4. 그림 개체
-# TODO
+# TODO 이게 정말 맞는 건지 확인하기
+record SHAPE_COMPONENT_PICTURE {
+	# TODO
+}
 
 # 4.2.9.5. OLE 개체
 record SHAPE_COMPONENT_OLE {
+	# TODO
+}
+
+# ???? TODO: 이것들 분류 찾기
+record SHAPE_COMPONENT_TEXTART {
 	# TODO
 }
 
@@ -722,4 +758,9 @@ record PAGE_BORDER_FILL {
 		UInt16 Bottom;
 	}
 	UInt16 BorderFill;
+}
+
+# ???? TODO: 이것들 분류 찾기
+record MEMO_LIST {
+	# TODO
 }

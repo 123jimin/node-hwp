@@ -1,7 +1,7 @@
 var assert = require('assert');
 var hwp = require('../');
 
-const file = 'test_3';
+const file = 'test_table_1';
 
 var test = function(ok){
 	hwp.open('./test/files/'+file+'.hwp', function(err, doc){
