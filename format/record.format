@@ -129,7 +129,8 @@ record BORDER_FILL {
 	Bits:2 {
 		0 Boolean ThreeD;
 		1 Boolean Shadow;
-		# TODO: Slash / BackSlash
+		2~4 Int Slash;
+		5~7 Int BackSlash;
 	}
 
 	# 문서와 다르게 이렇게 저장됨.
@@ -159,9 +160,10 @@ record BORDER_FILL {
 		ColorRef Color;
 	}
 
-	# TODO: 이것들이 의미하는 것 찾기.
-	UInt32 _type;
-	DWord _size;
+	# TODO: 정말 문서와 다르게 이게 맞는지 알아내기
+	# (우선 확실히 WindowBrush의 FaceColor는 +4B가 맞음)
+	UInt16 _type;
+	UInt16 _size;
 	{{ if(this.attr._type){ /* WindowBrush가 없는 것도 있음. */ }}
 	Group WindowBrush {
 		ColorRef FaceColor;
