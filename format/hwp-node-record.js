@@ -76,9 +76,13 @@ HWPNode.prototype.add = function add(elem){
 };
 
 HWPNode.prototype.setAttrWithFilter = function(attrs, filter){
-	for(var name in attrs) if(filter(name)){
-		if(this.attr[name] === undefined) console.warn("Warning: unexpected attr %s", name);
-		this.attr[name] = attrs[name];
+	filter = filter.bind(attrs);
+	for(var name in attrs){
+		if(name[0] == '_' || typeof attrs[name] == 'object') continue;
+		if(filter(name)){
+			if(this.attr[name] === undefined) console.warn("Warning: unexpected attr %s", name);
+			this.attr[name] = attrs[name];
+		}
 	}
 };
 
@@ -89,6 +93,7 @@ HWPNode.prototype.setAttr = function setAttr(attrs, list){
 		this.attr[name] = attrs[name];
 	}, this);
 	else for(var name in attrs){
+		if(name[0] == '_' || typeof attrs[name] == 'object') continue;
 		if(this.attr[name] === undefined) console.warn("Warning: unexpected attr %s", name);
 		this.attr[name] = attrs[name];
 	}

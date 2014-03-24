@@ -562,11 +562,13 @@ record CTRL_HEADER {
 
 # 4.2.7. 문단 리스트 헤드
 record LIST_HEADER {
-	Int16 ParaCount;
-	Bits:4 {
+	# TODO: 이게 정말 32비트인지, 아니면 16비트의 다른 필드가 더 있는지 확인하기
+	Int32 _ParaCount;
+	# 문서와 오프셋, 크기가 다른 듯.
+	Bits:2 {
 		0~2 Int TextDirection;
-		3~4 Int ParaLineBreak;
-		5~6 Int VertAlign;
+		3~4 enum LineWrapType: Int LineWrap;
+		5~6 enum VertAlignType: Int VertAlign;
 	}
 	# 다른 객체(예: CELL)들이 이 레코드를 이용해서 여러 정보를 담는 듯
 	{{ this.offset = offset.value; }}
@@ -594,7 +596,7 @@ record TABLE {
 		UInt16 Top;
 		UInt16 Bottom;
 	}
-	Array:RowCount RowSizes {
+	Array:RowCount _RowSizes {
 		UInt16 value;
 	}
 	UInt16 BorderFill;
