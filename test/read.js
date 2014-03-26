@@ -11,6 +11,8 @@ var files = [
 ];
 
 /*
+	XXX:
+		There are sometimes additional BORDERFILLs in ref
 	TODO:
 		Find informations about PARAHEAD[Start]
 */
@@ -19,7 +21,12 @@ var ignores = {
 	'attr': {
 		'BORDERFILLLIST': "Count",
 		'CHARSHAPE': "BorderFillId",
-		'PARAHEAD': "Start"
+		'PARAHEAD': "Start",
+		'PARABORDER': "BorderFill",
+		'PAGEBORDERFILL': "BorderFill",
+		'TABLE': "BorderFill",
+		'CELLZONE': "BorderFill",
+		'CELL': "BorderFill",
 	},
 	'children': [
 		'BORDERFILLLIST'
