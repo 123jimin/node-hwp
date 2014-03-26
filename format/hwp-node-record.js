@@ -100,7 +100,7 @@ HWPNode.prototype.setAttr = function setAttr(attrs, list){
 };
 
 HWPNode.prototype.setCount = function setCount(){
-	if(this.attr.Count !== undefined) this.attr.Count = this.children.length;
+	if('Count' in this.attr) this.attr.Count = this.children.length;
 };
 
 // Make one if not exists

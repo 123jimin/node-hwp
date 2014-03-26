@@ -325,6 +325,8 @@ node BORDERFILL {
 	Int CounterSlash default="0";
 	Int CounterBackSlash default="0";
 	Int BreakCellSeparateLine default="0";
+	# 문서에 없음
+	Int CenterLine default="0";
 }
 node LEFTBORDER {
 	enum LineType1 Type default="Solid";
