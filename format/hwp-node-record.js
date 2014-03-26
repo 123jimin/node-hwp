@@ -184,10 +184,10 @@ var HWPRawRecord = function HWPRawRecord(offset, buffer){
 	this._offset = offset + this.size;
 };
 
-HWPRawRecord.prototype.resolve = function(){
+HWPRawRecord.prototype.resolve = function(parent){
 	var tag = root.tag.table[this.tag];
 	if(!tag){
-		console.warn("Warning: unknown tag %d", this.tag);
+		console.warn("Warning: unknown tag %d from %s", this.tag, parent && parent.name || "(ROOT)");
 		this.children = [];
 		return this;
 	}
@@ -221,7 +221,7 @@ root.record.getTree = function getTree(offset, buffer){
 				prv = tmp;
 				if(!prvr) throw new Error('Invalid record root!');
 			}
-			tmp = record.resolve();
+			tmp = record.resolve(prv);
 			prv.children.push(tmp);
 			record.parent = prvr;
 			tmp.parent = prv;
