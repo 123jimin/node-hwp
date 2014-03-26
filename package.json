@@ -11,7 +11,8 @@
 		"url": "https://github.com/123jimin/node-hwp.git"
 	},
 	"dependencies": {
-		"ole-doc": "*"
+		"ole-doc": "*",
+		"xmldoc": "~0.1.2"
 	},
 	"devDependencies": {
 		"async": "~0.2.9",

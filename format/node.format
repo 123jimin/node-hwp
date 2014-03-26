@@ -232,7 +232,8 @@ enum TargetProgramType {
 node HWPML {
 	String Version default="2.8";
 	String SubVersion default="8.0.0.0";
-	String Style2 default="embed";
+	# Style2가 아니라 Style인 듯
+	String Style default="embed";
 }
 
 # 4. 헤더 엘리먼트
