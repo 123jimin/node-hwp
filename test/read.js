@@ -1,5 +1,4 @@
 var assert = require('assert'),
-	async = require('async'),
 	fs = require('fs'),
 	util = require('util'),
 	XMLDoc = require('xmldoc');
@@ -93,17 +92,21 @@ var check_file = function(file, callback){
 		}
 		check_stack.pop();
 	};
+	console.log("Opening "+file+".hwp");
 	hwp.open("./test/files/"+file+".hwp", function(err, doc){
 		assert.ifError(err);
 		var ref = new XMLDoc.XmlDocument(fs.readFileSync("./test/files/"+file+".hml", 'utf8'));
 		check_file_rec(doc._hml, ref, 0);
+		callback();
 	});
 };
 
 var test = function(ok){
-	async.map(files, check_file, function(err){
-		assert.ifError(err); ok();
-	});
+	var inner_loop = function f(ind){
+		if(ind == files.length) ok();
+		else check_file(files[ind], f.bind(null, ind+1));
+	};
+	inner_loop(0);
 };
 
 module.exports = {
