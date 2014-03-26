@@ -737,8 +737,9 @@ record FOOTNOTE_SHAPE {
 	WChar AutoNumFormat:PrefixChar;
 	WChar AutoNumFormat:SuffixChar;
 	UInt16 NoteNumbering:NewNumber;
-	# 문서가 틀림!
-	UInt32 NoteLine:Length;
+	# 문서가 틀림! (16비트가 아니라 32비트)
+	# Length가 -1이 될 수도 있는 듯
+	Int32 NoteLine:Length;
 	UInt16 NoteSpacing:AboveLine;
 	UInt16 NoteSpacing:BelowLine;
 	UInt16 NoteSpacing:BetweenNotes;

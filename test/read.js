@@ -17,6 +17,8 @@ var files = [
 		Find informations about PARAHEAD[Start]
 		Confirm default values of STYLE[LockForm], SECDEF[TextVerticalWidthHead]
 		Find informations about COMPATIBLEDOCUMENT
+		Find out why STARTNUMBER[Page] are different
+		Find out how NOTELINE[Length] is saved in record (5cm = -1?)
 */
 
 var ignores = {
@@ -26,17 +28,22 @@ var ignores = {
 		'PARAHEAD': "Start",
 		'PARABORDER': "BorderFill",
 		'STYLE': "LockForm",
-		'PAGEBORDERFILL': "BorderFill",
+		'PAGEBORDERFILL': "BorderFill BorferFill", // lol
 		'SECDEF': "TextVerticalWidthHead",
 		'TABLE': "BorderFill",
 		'CELLZONE': "BorderFill",
 		'CELL': "BorderFill",
+		'STARTNUMBER': "Page",
+		'NOTELINE': "Length",
 	},
 	'children': [
 		'BORDERFILLLIST'
 	],
 	'node': [
 		'COMPATIBLEDOCUMENT'
+	],
+	'empty': [
+		'TEXT'
 	]
 };
 
@@ -46,7 +53,7 @@ var ignores = {
 }());
 
 var check_file = function(file, callback){
-	var check_stack = ['1:1'];
+	var check_stack = [1];
 	var check_file_rec = function check(hml, ref, lev){
 		try{
 			check_stack[lev] = hml.name+"["+check_stack[lev]+"]";
@@ -68,6 +75,8 @@ var check_file = function(file, callback){
 			throw e;
 		}
 		if(ignores.children.indexOf(hml.name) == -1) for(var i=0,j=0; i<ref.children.length; i++){
+			if(!ref.children[i].value && !ref.children[i].children.length
+				&& ignores.empty.indexOf(ref.children[i].name) != -1) continue;
 			if(j >= hml.children.length && ignores.node.indexOf(ref.children[i].name) == -1){
 				console.error("File '"+file+"': At "+check_stack.join(" > "));
 				console.error("HML:", util.inspect(hml.children, {'depth': 1}));
@@ -75,7 +84,7 @@ var check_file = function(file, callback){
 				assert.fail(hml.children.length, ref.children.length, "HML too short");
 			}
 			if(ignores.node.indexOf(ref.children[i].name) == -1){
-				check_stack.push((j+1)+":"+(i+1));
+				check_stack.push(i==j?i:(j+1)+":"+(i+1));
 				check(hml.children[j++], ref.children[i], lev+1);
 			}
 		}
