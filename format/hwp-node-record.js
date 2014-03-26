@@ -187,7 +187,7 @@ var HWPRawRecord = function HWPRawRecord(offset, buffer){
 HWPRawRecord.prototype.resolve = function(parent){
 	var tag = root.tag.table[this.tag];
 	if(!tag){
-		console.warn("Warning: unknown tag %d from %s", this.tag, parent && parent.name || "(ROOT)");
+		console.warn("Warning [%s]: unknown tag %d", parent && parent.name || "(ROOT)", this.tag);
 		this.children = [];
 		return this;
 	}
