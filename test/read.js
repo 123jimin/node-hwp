@@ -15,6 +15,8 @@ var files = [
 		There are sometimes additional BORDERFILLs in ref
 	TODO:
 		Find informations about PARAHEAD[Start]
+		Confirm default values of STYLE[LockForm], SECDEF[TextVerticalWidthHead]
+		Find informations about COMPATIBLEDOCUMENT
 */
 
 var ignores = {
@@ -23,13 +25,18 @@ var ignores = {
 		'CHARSHAPE': "BorderFillId",
 		'PARAHEAD': "Start",
 		'PARABORDER': "BorderFill",
+		'STYLE': "LockForm",
 		'PAGEBORDERFILL': "BorderFill",
+		'SECDEF': "TextVerticalWidthHead",
 		'TABLE': "BorderFill",
 		'CELLZONE': "BorderFill",
 		'CELL': "BorderFill",
 	},
 	'children': [
 		'BORDERFILLLIST'
+	],
+	'node': [
+		'COMPATIBLEDOCUMENT'
 	]
 };
 
@@ -39,7 +46,7 @@ var ignores = {
 }());
 
 var check_file = function(file, callback){
-	var check_stack = [1];
+	var check_stack = ['1:1'];
 	var check_file_rec = function check(hml, ref, lev){
 		try{
 			check_stack[lev] = hml.name+"["+check_stack[lev]+"]";
@@ -47,8 +54,10 @@ var check_file = function(file, callback){
 			var hml_attr_keys = Object.keys(hml.attr).filter(function(x){return hml.attr[x] != null}),
 				ref_attr_keys = Object.keys(ref.attr);
 			ref_attr_keys.forEach(function(x){
-				if(!(hml.name in ignores.attr) || ignores.attr[hml.name].indexOf(x) == -1)
+				if(!(hml.name in ignores.attr) || ignores.attr[hml.name].indexOf(x) == -1){
+					if(hml.attr[x] == null) assert.fail(hml.attr[x], ref.attr[x], "Attribute does not exist ('"+x+"')");
 					assert.equal(hml.attr[x].toString(), ref.attr[x], "Different attribute ('"+x+"')");
+				}
 			});
 			assert.equal(hml.value || "", ref.val, "Different value");
 			assert.ok(hml.children.length <= ref.children.length, "HML too long");
@@ -58,12 +67,17 @@ var check_file = function(file, callback){
 			console.error("REF:", util.inspect(ref, {'depth': 1}));
 			throw e;
 		}
-		if(ignores.children.indexOf(hml.name) == -1) for(var i=0; i<ref.children.length; i++){
-			if(i >= hml.children.length){
+		if(ignores.children.indexOf(hml.name) == -1) for(var i=0,j=0; i<ref.children.length; i++){
+			if(j >= hml.children.length && ignores.node.indexOf(ref.children[i].name) == -1){
+				console.error("File '"+file+"': At "+check_stack.join(" > "));
+				console.error("HML:", util.inspect(hml.children, {'depth': 1}));
+				console.error("REF:", util.inspect(ref.children, {'depth': 1}));
 				assert.fail(hml.children.length, ref.children.length, "HML too short");
 			}
-			check_stack.push(i+1);
-			check(hml.children[i], ref.children[i], lev+1);
+			if(ignores.node.indexOf(ref.children[i].name) == -1){
+				check_stack.push((j+1)+":"+(i+1));
+				check(hml.children[j++], ref.children[i], lev+1);
+			}
 		}
 		check_stack.pop();
 	};
