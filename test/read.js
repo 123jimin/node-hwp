@@ -10,10 +10,16 @@ var files = [
 	// "shape_fill_1"
 ];
 
+/*
+	TODO:
+		Find informations about PARAHEAD[Start]
+*/
+
 var ignores = {
 	'attr': {
 		'BORDERFILLLIST': "Count",
-		'CHARSHAPE': "BorderFillId"
+		'CHARSHAPE': "BorderFillId",
+		'PARAHEAD': "Start"
 	},
 	'children': [
 		'BORDERFILLLIST'
