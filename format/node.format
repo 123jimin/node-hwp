@@ -118,7 +118,7 @@ enum BreakLatinWordType {
 	KeepWord; Hyphenation; BreakWord;
 }
 enum LineSpacingType {
-	Precent; Fixed; BetweenLines; AtLeast;
+	Percent; Fixed; BetweenLines; AtLeast;
 }
 enum StyleType {
 	Para; Char;
