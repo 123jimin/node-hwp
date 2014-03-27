@@ -351,8 +351,32 @@ record LAYOUT_COMPATIBILITY {
 	UInt32 _Field;
 }
 
-# ??? 금칙 문자 (TODO: 어떻게 저장되는지 찾기)
-record FORBIDDEN_CHAR;
+# ??? 금칙 문자 (TODO: 항상 필드 4개인지 확인하기)
+record FORBIDDEN_CHAR {
+	UInt32 _f0_len;
+	UInt32 _f1_len;
+	UInt32 _f2_len;
+	UInt32 _f3_len;
+	{{
+		var _attr = this.attr, _data = this.data;
+		var read_str = function(len, label){
+			if(len == 0) _attr[label] = " ";
+			else{
+				_attr[label] = "";
+				while(len-->0){
+					_attr[label] += String.fromCharCode(
+						_data.readUInt16LE(offset.value)
+					);
+					offset.value += 2;
+				}
+			}
+		};
+		read_str(_attr._f0_len, "_f0");
+		read_str(_attr._f1_len, "_f1");
+		read_str(_attr._f2_len, "_f2");
+		read_str(_attr._f3_len, "_f3");
+	}}
+}
 
 # 4.2.1. 문단 헤더
 record PARA_HEADER {
