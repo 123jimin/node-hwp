@@ -68,7 +68,13 @@ var check_file = function(file, callback){
 					assert.equal(hml.attr[x].toString(), ref.attr[x], "Different attribute ('"+x+"')");
 				}
 			});
-			assert.equal(hml.value || "", ref.val, "Different value");
+			var rv = ref.val;
+			if(rv && 'encoding' in hml) switch(hml.encoding){
+				case 'base64':
+					rv = rv.replace(/\s/g, '');
+					break;
+			}
+			assert.equal(hml.getEncodedValue() || "", rv, "Different value");
 			assert.ok(hml.children.length <= ref.children.length, "HML too long");
 		}catch(e){
 			console.error("File '"+file+"': At "+check_stack.join(" > "));

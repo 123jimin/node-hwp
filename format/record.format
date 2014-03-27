@@ -360,7 +360,7 @@ record FORBIDDEN_CHAR {
 	{{
 		var _attr = this.attr, _data = this.data;
 		var read_str = function(len, label){
-			if(len == 0) _attr[label] = " ";
+			if(len == 0) _attr[label] = "\x20";
 			else{
 				_attr[label] = "";
 				while(len-->0){

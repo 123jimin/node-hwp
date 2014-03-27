@@ -42,16 +42,22 @@ var escapeHTML = function(s){
 
 HWPNode.prototype.value = null;
 
+HWPNode.prototype.getEncodedValue = function(){
+	if(this.value == null) return null;
+	var v = this.value;
+	if('encoding' in this) switch(this.encoding){
+		case 'base64':
+			v = (new Buffer(v, 'utf16le')).toString('base64');
+			break;
+	}
+	return escapeHTML(v);
+};
+
 HWPNode.prototype.toHML = function(verbose){
 	var nl = verbose? '\n': '';
 	var toHML = function toHML(obj, tab){
 		var i, e, hml = "";
-		var ov = obj.value || null;
-		if(ov && 'encoding' in obj) switch(obj.encoding){
-			case 'base64':
-				ov = (new Buffer(ov)).toString('base64');
-				break;
-		}
+		var ov = obj.getEncodedValue();
 		if(obj.name == 'HWPML')
 			hml += tab + "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n";
 		hml += tab + '<' + obj.name;
@@ -64,10 +70,10 @@ HWPNode.prototype.toHML = function(verbose){
 			for(i=0;i<obj.children.length;i++){
 				hml += toHML(obj.children[i], verbose? tab+'  ': '');
 			}
-			if(ov) hml += escapeHTML(ov);
+			if(ov) hml += ov;
 			hml += tab+'</'+obj.name+'>'+nl;
-		}else if(ov || ov === ''){
-			hml += '>'+escapeHTML(ov)+'</'+obj.name+'>'+nl;
+		}else if(ov != null){
+			hml += '>'+ov+'</'+obj.name+'>'+nl;
 		}else{
 			hml += '/>'+nl;
 		}
