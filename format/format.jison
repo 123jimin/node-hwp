@@ -22,9 +22,10 @@
 		this.base = f;
 		this.offset = +o;
 	};
-	node.Node = function Node(s, v){
+	node.Node = function Node(s, v, e){
 		this.name = s;
 		this.schema = v;
+		this.encoding = e || null;
 	};
 	node.Record = function Record(s, v){
 		this.name = s;
@@ -310,6 +311,7 @@
 			if(o instanceof node.Node){
 				code += RT+"node."+o.name+" = function Node_"+o.name+"(){\n";
 				code += "\tthis.name = \""+o.name+"\"; this.attr = {}; this.children = [];\n";
+				if(o.encoding) code += "\tthis.encoding = \""+o.encoding.toLowerCase()+"\";\n";
 				code += o.schema.map(function(nodeType){
 					if(nodeType instanceof node.Comment)
 						return "// "+nodeType.value;
@@ -529,9 +531,14 @@ def_enum_single
 	;
 
 def_node
-	: NODE TOKEN LINE_END {$$ = new node.Node($2, []);}
-	| NODE TOKEN P_OPEN P_CLOSE {$$ = new node.Node($2, []);}
-	| NODE TOKEN P_OPEN def_node_inner P_CLOSE {$$ = new node.Node($2, $4);}
+	: NODE TOKEN def_node_schema {$$ = new node.Node($2, $3, null);}
+	| NODE TOKEN TOKEN def_node_schema {$$ = new node.Node($2, $4, $3);}
+	;
+
+def_node_schema
+	: LINE_END {$$ = [];}
+	| P_OPEN P_CLOSE {$$ = [];}
+	| P_OPEN def_node_inner P_CLOSE {$$ = $2;}
 	;
 
 def_node_inner

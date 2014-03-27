@@ -250,7 +250,7 @@ node DATE {}
 node KEYWORDS {}
 node COMMENTS {}
 node FORBIDDENSTRING {}
-node FORBIDDEN {
+node FORBIDDEN BASE64 {
 	String id;
 }
 
