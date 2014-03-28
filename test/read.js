@@ -55,7 +55,7 @@ var ignores = {
 }());
 
 var check_file = function(file, callback){
-	var check_stack = [1];
+	var check_stack = [0];
 	var check_file_rec = function check(hml, ref, lev){
 		try{
 			check_stack[lev] = hml.name+"["+check_stack[lev]+"]";

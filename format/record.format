@@ -501,7 +501,7 @@ record CTRL_HEADER {
 	4ChID _Type;
 	# 개체 공통 속성 읽기
 	Switch _Type {
-		Cases "eqed" "tbl ":
+		Cases "eqed" "tbl " "gso ":
 			Group ShapeObject{
 				Group Size;
 				Group Position;
@@ -542,7 +542,7 @@ record CTRL_HEADER {
 			}
 	}
 	Switch _Type {
-		Cases "eqed" "tbl ": # 아무 데이터도 없음.
+		Cases "eqed" "tbl " "gso ": # 아무 데이터도 없음.
 		Case "secd":
 			# Section Definition
 			Group Hide;
@@ -657,7 +657,13 @@ record LIST_CELL {
 # 4.2.9.2. 그리기 개체
 # 4.2.9.2.1. 개체 요소
 record SHAPE_COMPONENT {
-	# TODO
+	# TODO_SOMETIME: 왜 같은 타입이 두 개 있지?
+	4ChID _Type;
+	4ChID _Type2;
+	{{
+		if(this.attr._Type != this.attr._Type2)
+			console.warn("Warning [SHAPE_COMPONENT]: Different control ID ('%s', '%s')", this.attr._Type, this.attr._Type2);
+	}}
 }
 
 # 4.2.9.2.2. 선 개체
