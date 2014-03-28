@@ -657,13 +657,45 @@ record LIST_CELL {
 # 4.2.9.2. 그리기 개체
 # 4.2.9.2.1. 개체 요소
 record SHAPE_COMPONENT {
-	# TODO_SOMETIME: 왜 같은 타입이 두 개 있지?
+	# TODO: 루트인 경우에만 이 값이 중복되는 것 같은데, 확인할 것!
 	4ChID _Type;
 	4ChID _Type2;
-	{{
-		if(this.attr._Type != this.attr._Type2)
-			console.warn("Warning [SHAPE_COMPONENT]: Different control ID ('%s', '%s')", this.attr._Type, this.attr._Type2);
-	}}
+	{{ if(this.attr._Type != this.attr._Type2) offset.value -= 4; }}
+	Int32 XPos;
+	Int32 YPos;
+	Word GroupLevel;
+	Word _LocalFileVersion;
+	UInt32 OriWidth;
+	UInt32 OriHeight;
+	UInt32 CurWidth;
+	UInt32 CurHeight;
+	Bits:4 {
+		0 Boolean HorzFlip;
+		1 Boolean VertFlip;
+		# TODO_SOMETIME: 16, 19번째 비트
+	}
+	Group RotationInfo {
+		UInt16 Angle;
+		Int32 CenterX;
+		Int32 CenterY;
+	}
+	Group RenderingInfo {
+		Word _Count;
+		Group TransMatrix {
+			Float64 E1; Float64 E2; Float64 E3;
+			Float64 E4; Float64 E5; Float64 E6;
+		}
+		Array:_Count _ScaRotMatrices {
+			Group ScaMatrix {
+				Float64 E1; Float64 E2; Float64 E3;
+				Float64 E4; Float64 E5; Float64 E6;
+			}
+			Group RotMatrix {
+				Float64 E1; Float64 E2; Float64 E3;
+				Float64 E4; Float64 E5; Float64 E6;
+			}
+		}
+	}
 }
 
 # 4.2.9.2.2. 선 개체

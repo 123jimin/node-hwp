@@ -136,6 +136,11 @@
 				code += genEnum(vname, simple.enum);
 				code += offset.add(4);
 				return code;
+			case "Float64":
+				code = vname+"=this.data.readDoubleLE("+offset.value+");";
+				code += genEnum(vname, simple.enum);
+				code += offset.add(8);
+				return code;
 			case "WChar":
 				code = vname+"=this.data.readUInt16LE("+offset.value+");";
 				code += "if("+vname+")"+vname+"=String.fromCharCode("+vname+");else "+vname+"=null;";
@@ -377,6 +382,7 @@
 
 "String"	return "String";
 "Int"	return "Int";
+"Float" return "Float";
 "Boolean"	return "Boolean";
 
 "Array"	return "Array";
@@ -394,6 +400,7 @@
 "Int8"	return "Int8";
 "Int16"	return "Int16";
 "Int32"	return "Int32";
+"Float64" return "Float64";
 "ColorRef"	return "ColorRef";
 "4ChID"	return "FChID";
 
@@ -456,6 +463,7 @@ type_node
 	: String
 	| Int
 	| Boolean
+	| Float
 	| type_enum {$$ = "String";}
 	;
 
@@ -476,6 +484,7 @@ type_record
 	| SHWPUnit {$$ = "Int32";}
 	| UInt8 | UInt16 | UInt32
 	| Int8 | Int16 | Int32
+	| Float64
 	| ColorRef | FChID
 	;
 

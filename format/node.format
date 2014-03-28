@@ -902,16 +902,16 @@ node ROTATIONINFO {
 }
 node RENDERINGINFO {}
 node TRANSMATRIX {
-	Int E1; Int E2; Int E3;
-	Int E4; Int E5; Int E6;
+	Float E1; Float E2; Float E3;
+	Float E4; Float E5; Float E6;
 }
 node SCAMATRIX {
-	Int E1; Int E2; Int E3;
-	Int E4; Int E5; Int E6;
+	Float E1; Float E2; Float E3;
+	Float E4; Float E5; Float E6;
 }
 node ROTMATRIX {
-	Int E1; Int E2; Int E3;
-	Int E4; Int E5; Int E6;
+	Float E1; Float E2; Float E3;
+	Float E4; Float E5; Float E6;
 }
 node LINESHAPE {
 	Int Color;
