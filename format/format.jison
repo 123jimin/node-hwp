@@ -250,7 +250,7 @@
 			return c;
 		}
 		if(element instanceof node.Switch){
-			c = offset.toObj()+"switch("+base+"."+element.test+"){\n\t";
+			c = offset.toObj()+"switch(''+("+base+"."+element.test+")){\n\t";
 			c += element.cases.map(function(cs){
 				var cc;
 				if(cs instanceof node.Case){

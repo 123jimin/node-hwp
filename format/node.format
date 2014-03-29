@@ -70,8 +70,9 @@ enum InfillMode {
 enum LineWrapType {
 	Break; Squeeze; Keep;
 }
+# TODO: DOC: 문서와 실제가 다름. Tight와 Through 확인하기.
 enum TextWrapType {
-	Square; Tight; Through; TopAndBottom; BehindText; InFrontText;
+	Square; TopAndButtom; BehindText; InFrontOfText; Tight; Through;
 }
 enum FieldType {
 	Clickhere; Hyperlink; Bookmark; Formula; Summery; UserInfo;
@@ -917,7 +918,7 @@ node LINESHAPE {
 	Int Color;
 	Int Width;
 	enum LineType1 Style default="Solid";
-	enum EndCapStyle EndCap default="Flat";
+	enum EndCapType EndCap default="Flat";
 	enum ArrowType HeadStyle default="Normal";
 	enum ArrowType TailStyle default="Normal";
 	enum ArrowSize HeadSize default="SmallSmall";
@@ -984,6 +985,8 @@ node RECTANGLE {
 	Int X0; Int Y0;
 	Int X1; Int Y1;
 	Int X2; Int Y2;
+	# DOC: X3, Y3도 있음
+	Int X3; Int Y3;
 }
 
 # 5.6.3. 타원

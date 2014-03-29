@@ -87,27 +87,26 @@ HWPNode.prototype.add = function add(elem){
 	this.setCount();
 };
 
+var _setAttr = function(t, n, v){
+	if(t.attr[n] === undefined) console.warn("Warning [%s]: unexpected attr %s", t.name, n);
+	t.attr[n] = v;
+};
+
 HWPNode.prototype.setAttrWithFilter = function(attrs, filter){
 	filter = filter.bind(attrs);
 	for(var name in attrs){
 		if(name[0] == '_' || typeof attrs[name] == 'object') continue;
-		if(filter(name)){
-			if(this.attr[name] === undefined) console.warn("Warning: unexpected attr %s", name);
-			this.attr[name] = attrs[name];
-		}
+		if(filter(name)) _setAttr(this, name, attrs[name]);
 	}
 };
 
 HWPNode.prototype.setAttr = function setAttr(attrs, list){
 	if(list) list.forEach(function(name){
-		if(attrs[name] === undefined) console.warn("Warning: undefined attr %s", name);
-		if(this.attr[name] === undefined) console.warn("Warning: unexpected attr %s", name);
-		this.attr[name] = attrs[name];
+		_setAttr(this, name, attrs[name]);
 	}, this);
 	else for(var name in attrs){
 		if(name[0] == '_' || typeof attrs[name] == 'object') continue;
-		if(this.attr[name] === undefined) console.warn("Warning: unexpected attr %s", name);
-		this.attr[name] = attrs[name];
+		_setAttr(this, name, attrs[name]);
 	}
 };
 
@@ -205,7 +204,14 @@ HWPRawRecord.prototype.resolve = function(parent){
 	}
 	if(!root.record[tag]) throw new Error("Non-existing record type: "+tag);
 
-	var obj = new root.record[tag](this.data);
+	var obj;
+	try{
+		obj = new root.record[tag](this.data);
+	}catch(e){
+		console.error("Tag: %s", tag);
+		console.error("Data: %s", bufferToString(this.data));
+		throw e;
+	}
 	obj.children = [];
 	return obj;
 };

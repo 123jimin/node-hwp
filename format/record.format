@@ -90,7 +90,7 @@ record BIN_DATA {
 # 4.1.4. 글꼴
 record FACE_NAME {
 	Bits:1 {
-		# 문서에 없음
+		# DOC: 문서에 없음
 		0~1 enum FontType: Int Type;
 		5 Boolean HasDefault;
 		6 Boolean HasShape;
@@ -133,7 +133,7 @@ record BORDER_FILL {
 		5~7 Int BackSlash;
 	}
 
-	# 문서와 다르게 이렇게 저장됨.
+	# DOC: 문서와 다르게 이렇게 저장됨.
 	Group LeftBorder {
 		enum LineType1: UInt8 Type;
 		enum LineWidth: UInt8 Width;
@@ -160,7 +160,7 @@ record BORDER_FILL {
 		ColorRef Color;
 	}
 
-	# TODO: 정말 문서와 다르게 이게 맞는지 알아내기
+	# TODO: DOC: 정말 문서와 다르게 이게 맞는지 알아내기
 	# (우선 확실히 WindowBrush의 FaceColor는 +4B가 맞음)
 	UInt16 _type;
 	UInt16 _size;
@@ -525,7 +525,6 @@ record CTRL_HEADER {
 					24~25 enum TextFlowType: Int TextFlow;
 					26~28 enum NumberingType: Int NumberingType;
 				}
-				# TODO_SOMETIME: 세로가 먼저?
 				UInt32 Position:VertOffset;
 				UInt32 Position:HorzOffset;
 				UInt32 Size:Width;
@@ -588,9 +587,9 @@ record CTRL_HEADER {
 
 # 4.2.7. 문단 리스트 헤드
 record LIST_HEADER {
-	# TODO: 이게 정말 32비트인지, 아니면 16비트의 다른 필드가 더 있는지 확인하기
+	# TODO: DOC: 이게 정말 32비트인지, 아니면 16비트의 다른 필드가 더 있는지 확인하기
 	Int32 _ParaCount;
-	# 문서와 오프셋, 크기가 다른 듯.
+	# DOC: 문서와 오프셋, 크기가 다른 듯.
 	Bits:2 {
 		0~2 Int TextDirection;
 		3~4 enum LineWrapType: Int LineWrap;
@@ -630,7 +629,7 @@ record TABLE {
 }
 # LIST_HEADER가 앞에 있는 CELL
 record LIST_CELL {
-	# 문서에 설명이 없음!
+	# DOC: 문서에 설명이 없음!
 	Bits:2 {
 		0 Boolean HasMargin;
 		1 Boolean Protect;
@@ -657,10 +656,13 @@ record LIST_CELL {
 # 4.2.9.2. 그리기 개체
 # 4.2.9.2.1. 개체 요소
 record SHAPE_COMPONENT {
-	# TODO: 루트인 경우에만 이 값이 중복되는 것 같은데, 확인할 것!
+	# TODO: DOC: 루트인 경우에만 이 값이 중복되는 것 같은데, 확인할 것!
 	4ChID _Type;
 	4ChID _Type2;
-	{{ if(this.attr._Type != this.attr._Type2) offset.value -= 4; }}
+	{{
+		this.attr._IsDup = this.attr._Type == this.attr._Type2;
+		if(!this.attr._IsDup) offset.value -= 4;
+	}}
 	Int32 XPos;
 	Int32 YPos;
 	Word GroupLevel;
@@ -696,16 +698,87 @@ record SHAPE_COMPONENT {
 			}
 		}
 	}
+	Switch _Type {
+		Case "$con":
+			Word _Count;
+			Array:_Count _CTypes
+				4ChID value;
+			UInt32 InstID;
+		Cases "$rec" "$lin" "$ell" "$col":
+			Group LineShape {
+				ColorRef Color;
+				Int32 Width;
+				Bits:4 {
+					0~5 enum LineType1: Int Style;
+					6~9 enum EndCapType: Int EndCap;
+					10~15 enum ArrowType: Int HeadStyle;
+					16~21 enum ArrowType: Int TailStyle;
+					22~25 enum ArrowSize: Int HeadSize;
+					26~29 enum ArrowSize: Int TailSize;
+					# TODO_SOMETIME: 30, 31은?
+				}
+				enum OutlineStyleType: Byte OutlineStyle;
+			}
+			Group FillBrush {
+				UInt32 _BrushType;
+				Switch _BrushType {
+					Case "0":
+						# TODO
+						Int32 _Unknown;
+					Case "1":
+						Group WindowBrush {
+							ColorRef FaceColor;
+							# TODO: HatchColor, HatchStyle
+							UInt32 _Unknown1;
+							UInt32 _Unknown2;
+							UInt32 _Unknown3;
+							Byte Alpha;
+						}
+					Case "4":
+						Group Gradation {
+							Int32 Angle;
+							Int32 CenterX; Int32 CenterY;
+							UInt32 Step;
+							UInt32 ColorNum;
+							Array:ColorNum _Colors
+								ColorRef value;
+							# TODO
+							Int32 _Unknown;
+							Word StepCenter;
+						}
+					Else:
+						{{ console.warn("Warning [SHAPE_COMPONENT]: not processing FillBrush Type '%s'", this.attr._BrushType); }}
+				}
+			}
+			Group Shadow {
+				UInt32 Type;
+				ColorRef Color;
+				# TODO: 이 순서가 맞는지 확인하기
+				Int32 OffsetX; Int32 OffsetY;
+			}
+			UInt32 InstID;
+			Byte LineShape:Alpha;
+			Byte Shadow:Alpha;
+		Else:
+			{{ console.warn("Warning [SHAPE_COMPONENT]: not processing ShapeComponent Type '%s'", this.attr._Type); }}
+	}
 }
 
 # 4.2.9.2.2. 선 개체
 record SHAPE_COMPONENT_LINE {
-	# TODO
+	Int32 StartX; Int32 StartY;
+	Int32 EndX; Int32 EndY;
+	# TODO: DOC: 여기가 32비트인 것 같음; IsReverseHV 더하기
 }
 
 # 4.2.9.2.3. 사각형 개체
 record SHAPE_COMPONENT_RECTANGLE {
-	# TODO
+	Byte Ratio;
+	# DOC: 문서와 다르게 이렇게 저장됨
+	Int32 X0; Int32 Y0;
+	Int32 X1; Int32 Y1;
+	Int32 X2; Int32 Y2;
+	Int32 X3; Int32 Y3;
 }
 
 # 4.2.9.2.4. 타원 개체
@@ -715,17 +788,38 @@ record SHAPE_COMPONENT_ELLIPSE {
 
 # 4.2.9.2.5. 다각형 개체
 record SHAPE_COMPONENT_POLYGON {
-	# TODO
+	# DOC: 32비트임
+	Int32 _Count;
+	# DOC: 이렇게 저장됨
+	Array:_Count _Points {
+		Int32 X; Int32 Y;
+	}
+	# TODO_SOMETIME: 뒤에 뭐가 더 있는 것 같음 (4바이트)
 }
 
 # 4.2.9.2.6. 호 개체
 record SHAPE_COMPONENT_ARC {
-	# TODO
+	# TODO: DOC: 이 1바이트가 Type인 것 같은데, 확인하기
+	Byte _Type;
+	Int32 CenterX; Int32 CenterY;
+	Int32 Axis1X; Int32 Axis1Y;
+	Int32 Axis2X; Int32 Axis2Y;
 }
 
 # 4.2.9.2.7. 곡선 개체
 record SHAPE_COMPONENT_CURVE {
-	# TODO
+	# DOC: 32비트임
+	Int32 _Count;
+	# DOC: 이렇게 저장됨
+	Array:_Count _Points {
+		Int32 _X; Int32 _Y;
+	}
+	{{ this.attr._Count--; }}
+	Array:_Count _Types {
+		enum SegmentType: Byte value;
+	}
+	{{ this.attr._Count++; }}
+	# TODO_SOMETIME: 다각형 개체처럼 뒤에 뭐가 더 있음.
 }
 
 # 4.2.9.3. 한글 스크립트 수식 (한글 97 방식 수식)
