@@ -65,7 +65,9 @@ var check_file = function(file, callback){
 			ref_attr_keys.forEach(function(x){
 				if(!(hml.name in ignores.attr) || ignores.attr[hml.name].indexOf(x) == -1){
 					if(hml.attr[x] == null) assert.fail(hml.attr[x], ref.attr[x], "Attribute does not exist ('"+x+"')");
-					assert.equal(hml.attr[x].toString(), ref.attr[x], "Different attribute ('"+x+"')");
+					var msg = "Different attribute ('"+x+"')";
+					if(typeof hml.attr[x] == 'number') assert.equal(hml.attr[x], +ref.attr[x], msg);
+					else assert.equal(hml.attr[x].toString(), ref.attr[x], msg);
 				}
 			});
 			var rv = ref.val;
