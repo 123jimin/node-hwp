@@ -6,7 +6,9 @@ var hwp = require('../');
 
 var files = [
 	"text_1",
-	"shape_fill_1"
+	"shape_simple_1",
+	"shape_simple_2",
+	"shape_fill_1",
 ];
 
 /*
