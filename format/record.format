@@ -704,7 +704,7 @@ record SHAPE_COMPONENT {
 			Array:_Count _CTypes
 				4ChID value;
 			UInt32 InstID;
-		Cases "$rec" "$lin" "$ell" "$col":
+		Cases "$rec" "$lin" "$ell" "$col" "$pol":
 			Group LineShape {
 				ColorRef Color;
 				Int32 Width;
@@ -745,7 +745,8 @@ record SHAPE_COMPONENT {
 								ColorRef value;
 							# TODO
 							Int32 _Unknown;
-							Word StepCenter;
+							Byte StepCenter;
+							Byte Alpha;
 						}
 					Else:
 						{{ console.warn("Warning [SHAPE_COMPONENT]: not processing FillBrush Type '%s'", this.attr._BrushType); }}
@@ -754,14 +755,16 @@ record SHAPE_COMPONENT {
 			Group Shadow {
 				UInt32 Type;
 				ColorRef Color;
-				# TODO: 이 순서가 맞는지 확인하기
 				Int32 OffsetX; Int32 OffsetY;
 			}
 			UInt32 InstID;
 			Byte LineShape:Alpha;
 			Byte Shadow:Alpha;
 		Else:
-			{{ console.warn("Warning [SHAPE_COMPONENT]: not processing ShapeComponent Type '%s'", this.attr._Type); }}
+			{{
+				console.warn("Warning [SHAPE_COMPONENT]: not processing ShapeComponent Type '%s'", this.attr._Type);
+				console.warn("%s | %s", this.attr._Type, bufferToString(this.data.slice(offset.value)))
+			}}
 	}
 }
 
