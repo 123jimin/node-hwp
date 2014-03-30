@@ -704,7 +704,7 @@ record SHAPE_COMPONENT {
 			Array:_Count _CTypes
 				4ChID value;
 			UInt32 InstID;
-		Cases "$rec" "$lin" "$ell" "$col" "$pol":
+		Cases "$rec" "$lin" "$ell" "$col" "$pol" "$arc" "$cur":
 			Group LineShape {
 				ColorRef Color;
 				Int32 Width;
