@@ -736,6 +736,7 @@ record SHAPE_COMPONENT {
 						}
 					Case "4":
 						Group Gradation {
+							enum GradationType: Byte Type;
 							Int32 Angle;
 							Int32 CenterX; Int32 CenterY;
 							UInt32 Step;
