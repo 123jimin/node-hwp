@@ -49,6 +49,40 @@ tago BEGIN 77 MEMO_LIST;
 tago BEGIN 79 CHART_DATA;
 tago BEGIN 99 SHAPE_COMPONENT_UNKNOWN;
 
+micro FillBrush {
+	UInt32 _BrushType;
+	Switch _BrushType {
+		Case "0":
+			# TODO
+			Int32 _Unknown;
+		Case "1":
+			Group WindowBrush {
+				ColorRef FaceColor;
+				ColorRef HatchColor;
+				enum HatchStyle: Int32 HatchStyle;
+				# TODO
+				Int32 _Unknown;
+				Byte Alpha;
+			}
+		Case "4":
+			Group Gradation {
+				enum GradationType: Byte Type;
+				Int32 Angle;
+				Int32 CenterX; Int32 CenterY;
+				UInt32 Step;
+				UInt32 ColorNum;
+				Array:ColorNum _Colors
+					ColorRef value;
+				# TODO
+				Int32 _Unknown;
+				Byte StepCenter;
+				Byte Alpha;
+			}
+		Else:
+			{{ console.warn("Warning [?>FillBrush]: not processing FillBrush Type '%s'", this.attr._BrushType); }}
+	}
+}
+
 # 4.1.1. 문서 속성
 record DOCUMENT_PROPERTIES {
 	UInt16 SecCnt;
@@ -727,39 +761,7 @@ record SHAPE_COMPONENT {
 				}
 				enum OutlineStyleType: Byte OutlineStyle;
 			}
-			Group FillBrush {
-				UInt32 _BrushType;
-				Switch _BrushType {
-					Case "0":
-						# TODO
-						Int32 _Unknown;
-					Case "1":
-						Group WindowBrush {
-							ColorRef FaceColor;
-							ColorRef HatchColor;
-							enum HatchStyle: Int32 HatchStyle;
-							# TODO
-							Int32 _Unknown;
-							Byte Alpha;
-						}
-					Case "4":
-						Group Gradation {
-							enum GradationType: Byte Type;
-							Int32 Angle;
-							Int32 CenterX; Int32 CenterY;
-							UInt32 Step;
-							UInt32 ColorNum;
-							Array:ColorNum _Colors
-								ColorRef value;
-							# TODO
-							Int32 _Unknown;
-							Byte StepCenter;
-							Byte Alpha;
-						}
-					Else:
-						{{ console.warn("Warning [SHAPE_COMPONENT]: not processing FillBrush Type '%s'", this.attr._BrushType); }}
-				}
-			}
+			micro FillBrush: FillBrush;
 			Group Shadow {
 				UInt32 Type;
 				ColorRef Color;

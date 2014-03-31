@@ -31,6 +31,14 @@
 		this.name = s;
 		this.schema = v;
 	};
+	node.MicroDef = function MicroDef(s, v){
+		this.name = s;
+		this.values = v;
+	};
+	node.Micro = function Micro(t, s){
+		this.name = s;
+		this.type = t;
+	};
 	node.Type = function Type(){
 		this.name = null;
 		this.type = null;
@@ -213,7 +221,7 @@
 
 	var var_id = 0;
 
-	var recordCode = function(RT, base, element, offset){
+	var recordCode = function recordCode(RT, base, element, offset, micros){
 		var c;
 		if(element instanceof node.SimpleType
 			|| element instanceof node.Bits
@@ -223,7 +231,14 @@
 		if(element instanceof node.Group){
 			if(!element.defined) c = base+"."+element.name+" = {};\n\t";
 			c += element.values.map(function(e){
-				return recordCode(RT, base+"."+element.name, e, offset);
+				return recordCode(RT, base+"."+element.name, e, offset, micros);
+			}).join('\n\t');
+			return c;
+		}
+		if(element instanceof node.Micro){
+			c = base+"."+element.name+" = {};\n\t";
+			c += micros[element.type].map(function(e){
+				return recordCode(RT, base+"."+element.name, e, offset, micros);
 			}).join('\n\t');
 			return c;
 		}
@@ -238,7 +253,7 @@
 			c += "\tfor(var "+ind+"=0;"+cond+";"+ind+"++){\n";
 			c += "\t\t"+base+"."+element.name+"["+ind+"] = {};\n";
 			c += "\t\t"+element.type.map(function(e){
-				return recordCode(RT, base+"."+element.name+"["+ind+"]", e, offset);
+				return recordCode(RT, base+"."+element.name+"["+ind+"]", e, offset, micros);
 			}).join('\n\t\t')+"\n";
 			c += "\t}";
 			return c; 
@@ -260,7 +275,7 @@
 					cc = "case \""+cs.value+"\":";
 					if(cs.value != cs.new_value) cc += base+"."+element.test+"=\""+cs.new_value+"\";";
 					cc += cs.body.map(function(e){
-						return '\n\t'+recordCode(RT, base, e, offset);
+						return '\n\t'+recordCode(RT, base, e, offset, micros);
 					}).join('');
 					cc += "\n\tbreak;";
 					return cc;
@@ -270,7 +285,7 @@
 						return "case \""+s+"\":"
 					}).join(' ');
 					cc += cs.body.map(function(e){
-						return '\n\t'+recordCode(RT, base, e, offset);
+						return '\n\t'+recordCode(RT, base, e, offset, micros);
 					}).join('');
 					cc += "\n\tbreak;";
 					return cc;
@@ -278,7 +293,7 @@
 				if(cs instanceof node.Else){
 					cc = "default:";
 					cc += cs.body.map(function(e){
-						return '\n\t'+recordCode(RT, base, e, offset);
+						return '\n\t'+recordCode(RT, base, e, offset, micros);
 					});
 					return cc;
 				}
@@ -292,6 +307,7 @@
 
 	var generateCode = function(format){
 		var RT = "root", wc = "", tags = {}, tagInverse = [];
+		var micros = {};
 		format.forEach(function(o){
 			if(o == null) return;
 			if(o instanceof node.Root){
@@ -315,6 +331,10 @@
 			if(o instanceof node.TagOffset){
 				tagInverse[tags[o.base] + o.offset] = o.name;
 				return RT+"tag."+o.name+" = "+(tags[o.base] + o.offset)+";";
+			}
+			if(o instanceof node.MicroDef){
+				micros[o.name] = o.values;
+				return '';
 			}
 			if(o instanceof node.Node){
 				code += RT+"node."+o.name+" = function Node_"+o.name+"(){\n";
@@ -353,13 +373,13 @@
 				code += RT+"record."+o.name+" = function Record_"+o.name+"(data){\n";
 				code += "\tvar tmp; this.attr = {}; this.data = data; this.name = \""+o.name+"\";\n";
 				code += o.schema.map(function(element){
-					return recordCode(RT, 'this.attr', element, offset);
+					return recordCode(RT, 'this.attr', element, offset, micros);
 				}).map(function(s){return '\t'+s+'\n';}).join('');
 				code += "};";
 				return code;
 			}
 			return "// TODO: Process below object.\n/*\n"+o.toString()+"\n*/";
-		}).join('\n')+'\n';
+		}).filter(function(x){return x.length}).join('\n')+'\n';
 		wc += RT+"tag.table = "+JSON.stringify(tagInverse)+";";
 		return wc;
 	};
@@ -418,6 +438,7 @@
 "Else"	return "ELSE";
 
 "record"	return "RECORD";
+"micro"	return "MICRO";
 "type"	return "TYPE";
 "enum"	return "ENUM";
 "node"	return "NODE";
@@ -523,6 +544,7 @@ element
 	| def_tag {$$ = $1;}
 	| def_tago {$$ = $1;}
 	| def_record {$$ = $1;}
+	| def_micro {$$ = $1;}
 	| COMMENT {$$ = new node.Comment($1);}
 	| ROOT TOKEN {$$ = new node.Root($2);}
 	;
@@ -596,6 +618,7 @@ def_record_inner
 
 def_record_element
 	: def_record_simpletype {$$ = $1;}
+	| def_record_micro {$$ = $1;}
 	| def_record_group {$$ = $1;}
 	| def_record_array {$$ = $1;}
 	| def_record_bytestream {$$ = $1;}
@@ -608,6 +631,10 @@ def_record_simpletype
 	: type_record_enum _label LINE_END {$$ = new node.SimpleType($1.value, $1.enum, $2);}
 	| UNDO INTEGER LINE_END {$$ = new node.SimpleType('Undo', null, $2);}
 	| SCRIPT {$$ = new node.Script($1.slice(2,-2));}
+	;
+
+def_record_micro
+	: MICRO TOKEN ":" TOKEN LINE_END {$$ = new node.Micro($2, $4);}
 	;
 
 def_record_group
@@ -659,4 +686,10 @@ def_record_switch_element
 	| CASE _token ":" def_record_inner {$$ = new node.Case($2, $2, $4);}
 	| CASES token_list ":" def_record_inner {$$ = new node.Cases($2, $4);}
 	| ELSE ":" def_record_inner {$$ = new node.Else($3);}
+	;
+
+def_micro
+	: MICRO TOKEN LINE_END {$$ = new node.MicroDef($2, []);}
+	| MICRO TOKEN P_OPEN P_CLOSE {$$ = new node.MicroDef($2, []);}
+	| MICRO TOKEN P_OPEN def_record_inner P_CLOSE {$$ = new node.MicroDef($2, $4);}
 	;

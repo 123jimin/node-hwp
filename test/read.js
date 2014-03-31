@@ -5,6 +5,7 @@ var assert = require('assert'),
 var hwp = require('../');
 
 var files = [
+	"text_3",
 	"text_1",
 	"text_2",
 	"text_3",
@@ -33,18 +34,13 @@ var ignores = {
 		'BORDERFILLLIST': "Count",
 		'CHARSHAPE': "BorderFillId",
 		'PARAHEAD': "Start",
-		'PARABORDER': "BorderFill",
 		'STYLE': "LockForm",
-		'PAGEBORDERFILL': "BorderFill BorferFill", // lol
+		'PAGEBORDERFILL': "BorferFill", // lol
 		'SECDEF': "TextVerticalWidthHead",
-		'TABLE': "BorderFill",
-		'CELLZONE': "BorderFill",
-		'CELL': "BorderFill",
 		'STARTNUMBER': "Page",
 		'NOTELINE': "Length",
 	},
 	'children': [
-		'BORDERFILLLIST'
 	],
 	'node': [
 		'COMPATIBLEDOCUMENT',
