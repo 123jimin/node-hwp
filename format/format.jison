@@ -315,7 +315,7 @@
 			}
 			if(o instanceof node.Node){
 				code += RT+"node."+o.name+" = function Node_"+o.name+"(){\n";
-				code += "\tthis.name = \""+o.name+"\"; this.attr = {}; this.children = [];\n";
+				code += "\tthis.name = \""+o.name+"\"; this.attr = {}; this.children = []; this.text_children = [];\n";
 				if(o.encoding) code += "\tthis.encoding = \""+o.encoding.toLowerCase()+"\";\n";
 				code += o.schema.map(function(nodeType){
 					if(nodeType instanceof node.Comment)

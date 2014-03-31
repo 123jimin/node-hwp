@@ -6,6 +6,7 @@ var hwp = require('../');
 
 var files = [
 	"text_1",
+	"text_2",
 	"shape_simple_1",
 	"shape_simple_2",
 	"shape_fill_1",
@@ -97,7 +98,11 @@ var check_file = function(file, callback){
 			}
 			if(ignores.node.indexOf(rc.name) == -1){
 				check_stack.push(i==j?i:(j+1)+":"+(i+1));
-				check(hml.children[j++], rc, lev+1);
+				try{
+					check(hml.children[j++], rc, lev+1);
+				}catch(e){
+					throw e;
+				}
 			}
 		}
 		check_stack.pop();

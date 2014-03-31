@@ -20,6 +20,7 @@ var root;
 // Node
 var HWPNode = function HWPNode(){
 	this.children = [];
+	this.text_children = [];
 };
 
 var escapeHTML = function(s){
@@ -41,23 +42,32 @@ var escapeHTML = function(s){
 };
 
 HWPNode.prototype.value = null;
+HWPNode.prototype.offset = null;
 
-HWPNode.prototype.getEncodedValue = function(){
+HWPNode.prototype.getEncodedValue = function(toHML){
 	if(this.value == null) return null;
-	var v = this.value;
-	if('encoding' in this) switch(this.encoding){
+	switch(this.encoding){
 		case 'base64':
-			v = (new Buffer(v, 'utf16le')).toString('base64');
-			break;
+			return escapeHTML((new Buffer(this.value, 'utf16le')).toString('base64'));
+		default:
+			console.log(this.text_children.length);
+			if(this.text_children && this.text_children.length > 0){
+				var li = 0, v = "";
+				this.text_children.forEach(function(elem){
+					v += escapeHTML(this.value.slice(li, elem.offset));
+					v += toHML(elem, '', '');
+					li = elem.offset;
+				}, this);
+				return v + escapeHTML(this.value.slice(li));
+			}
 	}
-	return escapeHTML(v);
+	return escapeHTML(this.value);
 };
 
 HWPNode.prototype.toHML = function(verbose){
-	var nl = verbose? '\n': '';
-	var toHML = function toHML(obj, tab){
+	var toHML = function toHML(obj, tab, nl){
 		var i, e, hml = "";
-		var ov = obj.getEncodedValue();
+		var ov = obj.getEncodedValue(toHML);
 		if(obj.name == 'HWPML')
 			hml += tab + "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n";
 		hml += tab + '<' + obj.name;
@@ -68,7 +78,7 @@ HWPNode.prototype.toHML = function(verbose){
 		if(obj.children && obj.children.length > 0){
 			hml += '>'+nl;
 			for(i=0;i<obj.children.length;i++){
-				hml += toHML(obj.children[i], verbose? tab+'  ': '');
+				hml += toHML(obj.children[i], verbose? tab+'  ': '', nl);
 			}
 			if(ov) hml += ov;
 			hml += tab+'</'+obj.name+'>'+nl;
@@ -79,12 +89,16 @@ HWPNode.prototype.toHML = function(verbose){
 		}
 		return hml;
 	};
-	return toHML(this, '');
+	return toHML(this, '', verbose? '\n': '');
 };
 
 HWPNode.prototype.add = function add(elem){
 	this.children.push(elem);
 	this.setCount();
+};
+
+HWPNode.prototype.addText = function addText(elem){
+	this.text_children.push(elem);
 };
 
 var _setAttr = function(t, n, v){
