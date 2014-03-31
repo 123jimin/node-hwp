@@ -32,7 +32,6 @@ var files = [
 var ignores = {
 	'attr': {
 		'BORDERFILLLIST': "Count",
-		'CHARSHAPE': "BorderFillId",
 		'PARAHEAD': "Start",
 		'STYLE': "LockForm",
 		'PAGEBORDERFILL': "BorferFill", // lol
@@ -66,6 +65,8 @@ var same_num_rep = function(n, s){
 
 var check_file = function(file, callback){
 	var check_stack = [0];
+	// Border Fill Difference
+	var bfd = 0;
 	var check_file_rec = function check(hml, ref, lev){
 		try{
 			check_stack[lev] = hml.name+"["+check_stack[lev]+"]";
@@ -75,9 +76,12 @@ var check_file = function(file, callback){
 			ref_attr_keys.forEach(function(x){
 				if(!(hml.name in ignores.attr) || ignores.attr[hml.name].indexOf(x) == -1){
 					if(hml.attr[x] == null) assert.fail(hml.attr[x], ref.attr[x], "Attribute does not exist ('"+x+"')");
-					var msg = "Different attribute ('"+x+"')";
-					if(typeof hml.attr[x] == 'number') assert.ok(same_num_rep(hml.attr[x], ref.attr[x]), msg);
-					else assert.equal(hml.attr[x].toString(), ref.attr[x], msg);
+					var msg = "Different attribute ('"+x+"')", ha = hml.attr[x], ra = ref.attr[x];
+					// Adjust BorderFillId
+					if(hml.name == 'BORDERFILL' && x == 'Id'
+						|| x == 'BorderFill' || x == 'BorderFillId') ha = (+ha)+bfd;
+					if(typeof hml.attr[x] == 'number') assert.ok(same_num_rep(ha, ra), msg);
+					else assert.equal(ha.toString(), ra, msg);
 				}
 			});
 			var rv = ref.val;
@@ -94,21 +98,29 @@ var check_file = function(file, callback){
 			console.error("REF:", util.inspect(ref, {'depth': 1}));
 			throw e;
 		}
-		if(ignores.children.indexOf(hml.name) == -1) for(var i=0,j=0; i<ref.children.length; i++){
-			var rc = ref.children[i];
-			if(!rc.value && !rc.children.length && ignores.empty.indexOf(rc.name) != -1) continue;
-			if(j >= hml.children.length && ignores.node.indexOf(rc.name) == -1){
-				console.error("File '"+file+"': At "+check_stack.join(" > "));
-				console.error("HML:", util.inspect(hml.children, {'depth': 1}));
-				console.error("REF:", util.inspect(ref.children, {'depth': 1}));
-				assert.fail(hml.children.length, ref.children.length, "Missing child: "+rc.name);
+		if(ignores.children.indexOf(hml.name) == -1){
+			var i=0, j=0;
+			if(hml.name == 'BORDERFILLLIST'){
+				bfd = ref.children.length - hml.children.length;
+				if(bfd != 0 && bfd != 1) assert.fail(hml.children.length, ref.children.length, "Difference too big in BORDERFILLLIST");
+				i = bfd;
 			}
-			if(ignores.node.indexOf(rc.name) == -1){
-				check_stack.push(i==j?i:(j+1)+":"+(i+1));
-				try{
-					check(hml.children[j++], rc, lev+1);
-				}catch(e){
-					throw e;
+			for(;i<ref.children.length;i++){
+				var rc = ref.children[i];
+				if(!rc.value && !rc.children.length && ignores.empty.indexOf(rc.name) != -1) continue;
+				if(j >= hml.children.length && ignores.node.indexOf(rc.name) == -1){
+					console.error("File '"+file+"': At "+check_stack.join(" > "));
+					console.error("HML:", util.inspect(hml.children, {'depth': 1}));
+					console.error("REF:", util.inspect(ref.children, {'depth': 1}));
+					assert.fail(hml.children.length, ref.children.length, "Missing child: "+rc.name);
+				}
+				if(ignores.node.indexOf(rc.name) == -1){
+					check_stack.push(i==j?i:(j+1)+":"+(i+1));
+					try{
+						check(hml.children[j++], rc, lev+1);
+					}catch(e){
+						throw e;
+					}
 				}
 			}
 		}
