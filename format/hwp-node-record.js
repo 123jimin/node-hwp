@@ -50,7 +50,6 @@ HWPNode.prototype.getEncodedValue = function(toHML){
 		case 'base64':
 			return escapeHTML((new Buffer(this.value, 'utf16le')).toString('base64'));
 		default:
-			console.log(this.text_children.length);
 			if(this.text_children && this.text_children.length > 0){
 				var li = 0, v = "";
 				this.text_children.forEach(function(elem){
