@@ -72,7 +72,7 @@ enum LineWrapType {
 }
 # TODO: DOC: 문서와 실제가 다름. Tight와 Through 확인하기.
 enum TextWrapType {
-	Square; TopAndButtom; BehindText; InFrontOfText; Tight; Through;
+	Square; TopAndBottom; BehindText; InFrontOfText; Tight; Through;
 }
 enum FieldType {
 	Clickhere; Hyperlink; Bookmark; Formula; Summery; UserInfo;
@@ -167,7 +167,7 @@ enum LayoutType {
 	Left; Right; Mirror;
 }
 enum PageBreakType {
-	Table; Cell; None;
+	None; Table; Cell;
 }
 enum NumberingType {
 	None; Figure; Table; Equation;
