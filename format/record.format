@@ -176,43 +176,48 @@ record BORDER_FILL {
 
 # 4.1.6. 글자 모양
 record CHAR_SHAPE{
-	Array:7 FontIDs
+	Array:7 _FontIDs
 		Word value;
-	Array:7 FontRatios
+	Array:7 _FontRatios
 		UInt8 value;
-	Array:7 FontCharSpacings
+	Array:7 _FontCharSpacings
 		Int8 value;
-	Array:7 FontRelSizes
+	Array:7 _FontRelSizes
 		UInt8 value;
-	Array:7 FontCharOffsets
+	Array:7 _FontCharOffsets
 		Int8 value;
 	Int32 Height;
 
 	Group Shadow;
+	Group Underline;
+	Group Strikeout;
 	Bits:4 {
-		0 Boolean Italic;
-		1 Boolean Bold;
-		# TODO: 밑줄 종류 및 모양
+		0 Boolean _Italic;
+		1 Boolean _Bold;
+		2~3 enum UnderlineType: Int Underline:Type;
+		4~7 enum LineType2: Int Underline:Shape;
 		8~10 enum LineType3: Int OutlineType;
 		11~12 enum ShadowType: Int Shadow:Type;
-		13 Boolean Emboss;
-		14 Boolean Engrave;
-		15 Boolean SuperScript;
-		16 Boolean SubScript;
-		# TODO: 취소선 종류 및 모양
-		# 숫자임.
+		13 Boolean _Emboss;
+		14 Boolean _Engrave;
+		15 Boolean _SuperScript;
+		16 Boolean _SubScript;
+		# 17: Reserved
+		18~20 enum StrikeoutType: Int Strikeout:Type;
+		# SymMark는 숫자임.
 		21~24 Int SymMark;
 		25 Boolean UseFontSpace;
+		26~29 enum LineType2: Int Strikeout:Shape;
 		30 Boolean UseKerning;
 	}
 	Int8 Shadow:OffsetX;
 	Int8 Shadow:OffsetY;
 	ColorRef TextColor;
-	ColorRef UnderlineColor;
+	ColorRef Underline:Color;
 	ColorRef ShadeColor;
 	ColorRef Shadow:Color;
 	UInt16 BorderFillId;
-	ColorRef StrikeColor;
+	ColorRef Strikeout:Color;
 
 	# TODO: 밑줄
 	# TODO: 취소선
