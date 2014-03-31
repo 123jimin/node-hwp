@@ -358,7 +358,7 @@ node FILLBRUSH {}
 node WINDOWBRUSH {
 	Int FaceColor;
 	Int HatchColor;
-	Int HatchStyle;
+	enum HatchStyle HatchStyle;
 	Int Alpha;
 }
 node GRADATION {

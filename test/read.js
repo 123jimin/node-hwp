@@ -61,6 +61,13 @@ var ignores = {
 	for(x in ignores.attr) ignores.attr[x] = ignores.attr[x].split(' ');
 }());
 
+// s가 n과 비슷한지 확인
+var same_num_rep = function(n, s){
+	if(n == +s) return true;
+	if(s.indexOf('.') == -1) return false;
+	return s == n.toFixed(s.split('.')[1].length);
+};
+
 var check_file = function(file, callback){
 	var check_stack = [0];
 	var check_file_rec = function check(hml, ref, lev){
@@ -73,7 +80,7 @@ var check_file = function(file, callback){
 				if(!(hml.name in ignores.attr) || ignores.attr[hml.name].indexOf(x) == -1){
 					if(hml.attr[x] == null) assert.fail(hml.attr[x], ref.attr[x], "Attribute does not exist ('"+x+"')");
 					var msg = "Different attribute ('"+x+"')";
-					if(typeof hml.attr[x] == 'number') assert.equal(hml.attr[x], +ref.attr[x], msg);
+					if(typeof hml.attr[x] == 'number') assert.ok(same_num_rep(hml.attr[x], ref.attr[x]), msg);
 					else assert.equal(hml.attr[x].toString(), ref.attr[x], msg);
 				}
 			});

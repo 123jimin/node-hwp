@@ -736,10 +736,10 @@ record SHAPE_COMPONENT {
 					Case "1":
 						Group WindowBrush {
 							ColorRef FaceColor;
-							# TODO: HatchColor, HatchStyle
-							UInt32 _Unknown1;
-							UInt32 _Unknown2;
-							UInt32 _Unknown3;
+							ColorRef HatchColor;
+							enum HatchStyle: Int32 HatchStyle;
+							# TODO
+							Int32 _Unknown;
 							Byte Alpha;
 						}
 					Case "4":
