@@ -407,7 +407,7 @@ record PARA_TEXT {
 		
 		var flushBuffer = (function(x){
 			var y = tmp;
-			if(buf.length == 0) return;
+			if(buf.length == 0 && !x) return;
 			if(tmp){
 				this.text.push({
 					'type': tmp,
