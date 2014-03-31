@@ -240,10 +240,8 @@ record CHAR_SHAPE{
 	ColorRef ShadeColor;
 	ColorRef Shadow:Color;
 	UInt16 BorderFillId;
+	~
 	ColorRef Strikeout:Color;
-
-	# TODO: 밑줄
-	# TODO: 취소선
 }
 
 # 4.1.7 탭 정의
@@ -336,8 +334,7 @@ record PARA_SHAPE {
 		4 Boolean AutoSpaceEAsianEng;
 		5 Boolean AutoSpaceEAsianNum;
 	}
-
-	# TODO_SOMETIME: 2007 이하에서 이게 없을까?
+	~
 	Bits:4 {
 		0~4 enum LineSpacingType: Int ParaMargin:LineSpacingType;
 	}
@@ -568,9 +565,11 @@ record CTRL_HEADER {
 				UInt32 InstId;
 				# TODO_SOMETIME: 이 4 바이트의 정체는? (캡션 수?)
 				UInt32 _unknown;
+				~
 				WString ShapeComment:value;
 			}
 	}
+	# 주의: 위에서 이미 return되었을 수도 있음!
 	Switch _Type {
 		Cases "eqed" "tbl " "gso ": # 아무 데이터도 없음.
 		Case "secd":
@@ -613,7 +612,6 @@ record CTRL_HEADER {
 		Else:
 			{{ console.warn("Warning [CTRL_HEADER]: not processing Control Type '%s'", this.attr._Type); }}
 	}
-	{{ this.type = this.attr._Type; delete this.attr._Type; }}
 }
 
 # 4.2.7. 문단 리스트 헤드

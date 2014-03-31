@@ -4,6 +4,9 @@
 	node.Root = function Root(s){
 		this.value = s;
 	};
+	node.CheckEnd = function CheckEnd(){
+		this.type = "CheckEnd";
+	};
 	node.Comment = function Comment(s){
 		this.value = s.slice(2);
 		this.type = "Comment";
@@ -114,6 +117,9 @@
 		switch(simple.type){
 			case "Undo": return offset.add(-simple.name);
 			case "Comment": return "// "+simple.value;
+			case "CheckEnd":
+				code = "if("+offset.value+">=this.data.length)return;"
+				return code;
 			case "Byte":
 				code = vname+"=this.data.readUInt8("+offset.value+");";
 				code += genEnum(vname, simple.enum);
@@ -225,7 +231,8 @@
 		var c;
 		if(element instanceof node.SimpleType
 			|| element instanceof node.Bits
-			|| element instanceof node.Comment){
+			|| element instanceof node.Comment
+			|| element instanceof node.CheckEnd){
 			return simpleTypeCode(RT, base, element, offset);
 		}
 		if(element instanceof node.Group){
@@ -625,6 +632,7 @@ def_record_element
 	| def_record_bits {$$ = $1;}
 	| def_record_switch {$$ = $1;}
 	| COMMENT {$$ = new node.Comment($1);}
+	| "~" {$$ = new node.CheckEnd();}
 	;
 
 def_record_simpletype
