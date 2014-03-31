@@ -10,6 +10,7 @@ var files = [
 	"text_3",
 	"shape_simple_1",
 	"shape_simple_2",
+	"shape_simple_3",
 	"shape_fill_1",
 ];
 
