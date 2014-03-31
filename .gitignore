@@ -1,3 +1,5 @@
+priv_files
 node_modules
-format/format.js
 npm-debug.log
+format/format.js
+.gitignore
