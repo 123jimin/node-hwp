@@ -492,7 +492,10 @@ record PARA_LINE_SEG {
 
 # 4.2.5. 문단의 영역 태그
 record PARA_RANGE_TAG {
-	# TODO: 직접 처리
+	Array:* _Data {
+		UInt32 start; UInt32 end;
+		UInt32 data;
+	}
 }
 
 # 4.2.6. 컨트롤 헤더

@@ -228,11 +228,14 @@
 			return c;
 		}
 		if(element instanceof node.Array){
-			var ind = 'ii'+var_id;
+			var ind = 'ii'+(var_id++);
 			var il = element.length;
+			var cond;
 			if(typeof il == 'string') il = base+'.'+il;
 			c = base+"."+element.name+"=[];"+offset.toObj()+"\n";
-			c += "\tfor(var "+ind+"=0;"+ind+"<"+il+";"+ind+"++){\n";
+			if(il === -1) cond = offset.value+"<this.data.length";
+			else cond = ind+"<"+il;
+			c += "\tfor(var "+ind+"=0;"+cond+";"+ind+"++){\n";
 			c += "\t\t"+base+"."+element.name+"["+ind+"] = {};\n";
 			c += "\t\t"+element.type.map(function(e){
 				return recordCode(RT, base+"."+element.name+"["+ind+"]", e, offset);
@@ -429,6 +432,7 @@
 "="	return "=";
 ":"	return ":";
 "~"	return "~";
+"*" return "*";
 
 [0-9]+	return "INTEGER";
 [A-Za-z0-9_\-]+	return "TOKEN";
@@ -496,6 +500,7 @@ type_record_enum
 type_record_array_type
 	: Array ":" TOKEN {$$ = $3;}
 	| Array ":" INTEGER {$$ = +$3;}
+	| Array ":" "*" {$$ = -1;}
 	;
 
 type_record_bytestream_type
