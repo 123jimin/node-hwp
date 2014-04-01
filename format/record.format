@@ -695,10 +695,10 @@ record SHAPE_COMPONENT {
 	Int32 YPos;
 	Word GroupLevel;
 	Word _LocalFileVersion;
-	UInt32 OriWidth;
-	UInt32 OriHeight;
-	UInt32 CurWidth;
-	UInt32 CurHeight;
+	Int32 OriWidth;
+	Int32 OriHeight;
+	Int32 CurWidth;
+	Int32 CurHeight;
 	Bits:4 {
 		0 Boolean HorzFlip;
 		1 Boolean VertFlip;
@@ -819,7 +819,8 @@ record SHAPE_COMPONENT_ELLIPSE {
 	Bits:4 {
 		0 Boolean IntervalDirty;
 		1 Boolean HasArcProperty;
-		2~9 enum ArcType: Int ArcType;
+		# TODO: DOC: 2~7은?
+		8~9 enum ArcType: Int ArcType;
 	}
 	Int32 CenterX; Int32 CenterY;
 	Int32 Axis1X; Int32 Axis1Y;

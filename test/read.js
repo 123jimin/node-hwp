@@ -13,9 +13,15 @@ var files = [
 	"shape_simple_1",
 	"shape_simple_2",
 	"shape_simple_3",
+	"shape_simple_4",
 	"shape_arrow_1",
+	"shape_textwrap_1",
 	"shape_fill_1",
 	"shape_fill_2",
+	"shape_group_1",
+	"shape_complex_1",
+	"sample_1",
+	"sample_2",
 ];
 
 /*
@@ -70,7 +76,8 @@ var ignores = {
 var same_num_rep = function(n, s){
 	if(n == +s) return true;
 	if(s.indexOf('.') == -1) return false;
-	return s == n.toFixed(s.split('.')[1].length);
+	n = n.toFixed(s.split('.')[1].length);
+	return n == s || n == '-'+s;
 };
 
 var check_file = function(file, callback){
@@ -155,6 +162,6 @@ var test = function(ok){
 };
 
 module.exports = {
-	'description': "Reads HWP document and compare it to reference HML files.",
+	'description': "Reads HWP documents and compare it to reference HML files.",
 	'run': test
 };
