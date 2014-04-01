@@ -178,7 +178,7 @@
 				return code;
 			case "Bits":
 				if(simple.name){
-					code += "this.attr."+simple.name+"={};";
+					code += vname+"={};";
 					base += '.'+simple.name;
 				}
 				code += "tmp=this.data.slice("+offset.value+","+offset.plus(simple.length)+");";
@@ -236,17 +236,17 @@
 			return simpleTypeCode(RT, base, element, offset);
 		}
 		if(element instanceof node.Group){
-			if(!element.defined) c = base+"."+element.name+" = {};\n\t";
-			c += element.values.map(function(e){
-				return recordCode(RT, base+"."+element.name, e, offset, micros);
-			}).join('\n\t');
+			if(!element.defined) c = base+"."+element.name+"={};";
+			element.values.forEach(function(e){
+				c += "\n\t"+recordCode(RT, base+"."+element.name, e, offset, micros);
+			});
 			return c;
 		}
 		if(element instanceof node.Micro){
-			c = base+"."+element.name+" = {};\n\t";
-			c += micros[element.type].map(function(e){
-				return recordCode(RT, base+"."+element.name, e, offset, micros);
-			}).join('\n\t');
+			c = base+"."+element.name+"={};";
+			micros[element.type].forEach(function(e){
+				c += recordCode(RT, base+"."+element.name, e, offset, micros);
+			});
 			return c;
 		}
 		if(element instanceof node.Array){
@@ -258,7 +258,7 @@
 			if(il === -1) cond = offset.value+"<this.data.length";
 			else cond = ind+"<"+il;
 			c += "\tfor(var "+ind+"=0;"+cond+";"+ind+"++){\n";
-			c += "\t\t"+base+"."+element.name+"["+ind+"] = {};\n";
+			c += "\t\t"+base+"."+element.name+"["+ind+"]={};\n";
 			c += "\t\t"+element.type.map(function(e){
 				return recordCode(RT, base+"."+element.name+"["+ind+"]", e, offset, micros);
 			}).join('\n\t\t')+"\n";
@@ -344,14 +344,14 @@
 				return '';
 			}
 			if(o instanceof node.Node){
-				code += RT+"node."+o.name+" = function Node_"+o.name+"(){\n";
-				code += "\tthis.name = \""+o.name+"\"; this.attr = {}; this.children = []; this.text_children = [];\n";
-				if(o.encoding) code += "\tthis.encoding = \""+o.encoding.toLowerCase()+"\";\n";
+				code += RT+"node."+o.name+"=function Node_"+o.name+"(){\n";
+				code += "\tthis.name=\""+o.name+"\";this.attr={};this.children=[];\n";
+				if(o.encoding) code += "\tthis.encoding=\""+o.encoding.toLowerCase()+"\";\n";
 				code += o.schema.map(function(nodeType){
 					if(nodeType instanceof node.Comment)
 						return "// "+nodeType.value;
 					else
-						return "this.attr."+nodeType.name+" = "+(nodeType.options.default?"\""+nodeType.options.default+"\"":'null')+";";
+						return "this.attr."+nodeType.name+"="+(nodeType.options.default?"\""+nodeType.options.default+"\"":'null')+";";
 				}).map(function(s){return '\t'+s+'\n';}).join('');
 				code += "};";
 				return code;
@@ -378,9 +378,9 @@
 					return code;
 				}};
 				code += RT+"record."+o.name+" = function Record_"+o.name+"(data){\n";
-				code += "\tvar tmp; this.attr = {}; this.data = data; this.name = \""+o.name+"\";\n";
+				code += "\tvar tmp,attr=this.attr={};this.data=data;this.name=\""+o.name+"\";\n";
 				code += o.schema.map(function(element){
-					return recordCode(RT, 'this.attr', element, offset, micros);
+					return recordCode(RT, 'attr', element, offset, micros);
 				}).map(function(s){return '\t'+s+'\n';}).join('');
 				code += "};";
 				return code;
