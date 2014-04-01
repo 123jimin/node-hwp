@@ -1027,14 +1027,19 @@ node SEGMENT {
 
 # 5.6.7. 연결선
 node CONNECTLINE {
-	# TODO_SOMETIME: 타입 찾기
-	String Type;
+	Int Type;
 	Int StartX; Int StartY;
 	Int EndX; Int EndY;
 	Int StartSubjectID;
 	Int StartSubjectIndex;
 	Int EndSubjectID;
 	Int EndSubjectIndex;
+}
+
+# DOC: 문서에 없음
+node CONTROLPOINT {
+	Int Type;
+	Int X; Int Y;
 }
 
 # 5.7. Unknown Object

@@ -744,8 +744,21 @@ record SHAPE_COMPONENT {
 					16~21 enum ArrowType: Int TailStyle;
 					22~25 enum ArrowSize: Int HeadSize;
 					26~29 enum ArrowSize: Int TailSize;
-					# TODO_SOMETIME: 30, 31은?
+					30 Boolean _HeadFilled;
+					31 Boolean _TailFilled;
 				}
+				{{
+					var adjustArrSize = function adjustArrSize(x){
+						if(this.attr.LineShape["_"+x+"Filled"]){
+							var v = this.attr.LineShape[x+"Style"];
+							if(v.slice(0,5) == "Empty"){
+								this.attr.LineShape[x+"Style"] = "Filled"+v.slice(5);
+							}
+						}
+					};
+					adjustArrSize.call(this, "Head");
+					adjustArrSize.call(this, "Tail");
+				}}
 				enum OutlineStyleType: Byte OutlineStyle;
 			}
 			micro FillBrush: FillBrush;
@@ -769,7 +782,27 @@ record SHAPE_COMPONENT {
 record SHAPE_COMPONENT_LINE {
 	Int32 StartX; Int32 StartY;
 	Int32 EndX; Int32 EndY;
-	# TODO: DOC: 여기가 32비트인 것 같음; IsReverseHV 더하기
+	# DOC: 이곳이 4바이트인 것 같음
+	Bits:2 {
+		0 Boolean IsReverseHV;
+	}
+}
+
+# SHAPE_COMPONENT_LINE과 같고, 부모의 타입으로 알아 내야 됨.
+record SHAPE_COMPONENT_CONNECTLINE {
+	Int32 StartX; Int32 StartY;
+	Int32 EndX; Int32 EndY;
+	Int32 Type;
+	UInt32 StartSubjectID;
+	UInt32 StartSubjectIndex;
+	UInt32 EndSubjectID;
+	UInt32 EndSubjectIndex;
+	UInt32 _Count;
+	Array:_Count _ControlPoints {
+		Int32 X; Int32 Y;
+		Word Type;
+	}
+	# TODO_SOMETIME: 뒤에 뭐가 더 있는 것 같음 (4바이트)
 }
 
 # 4.2.9.2.3. 사각형 개체
@@ -790,7 +823,7 @@ record SHAPE_COMPONENT_ELLIPSE {
 # 4.2.9.2.5. 다각형 개체
 record SHAPE_COMPONENT_POLYGON {
 	# DOC: 32비트임
-	Int32 _Count;
+	UInt32 _Count;
 	# DOC: 이렇게 저장됨
 	Array:_Count _Points {
 		Int32 X; Int32 Y;
@@ -810,7 +843,7 @@ record SHAPE_COMPONENT_ARC {
 # 4.2.9.2.7. 곡선 개체
 record SHAPE_COMPONENT_CURVE {
 	# DOC: 32비트임
-	Int32 _Count;
+	UInt32 _Count;
 	# DOC: 이렇게 저장됨
 	Array:_Count _Points {
 		Int32 _X; Int32 _Y;
