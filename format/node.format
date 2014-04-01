@@ -60,7 +60,7 @@ enum LangType {
 	Hangul; Latin; Hanja; Japanese; Other; Symbol; User;
 }
 enum HatchStyle {
-	null; Horizontal; Vertical; BackSlash; Slash; Cross; CrossDiagonal;
+	Horizontal; Vertical; Slash; BackSlash; Cross; CrossDiagonal;
 }
 enum InfillMode {
 	Tile; TileHorzTop; TileHorzBottom; TileVertLeft; TileVertRight;
@@ -1000,7 +1000,7 @@ node ELLIPSE {
 	Int Start1X; Int Start1Y;
 	Int End1X; Int End1Y;
 	Int Start2X; Int Start2Y;
-	Int End2x; Int End2Y;
+	Int End2X; Int End2Y;
 }
 
 # 5.6.4. 호

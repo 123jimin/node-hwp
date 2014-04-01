@@ -624,7 +624,7 @@ record LIST_HEADER {
 		3~4 enum LineWrapType: Int LineWrap;
 		5~6 enum VertAlignType: Int VertAlign;
 	}
-	# 다른 객체(예: LIST_CELL)들이 이 레코드 뒤에 담겨 있는 듯.
+	# 다른 객체(예: LIST_CELL, LIST_DRAWTEXT)들이 이 레코드 뒤에 담겨 있는 듯.
 	{{ this.offset = offset.value; }}
 }
 
@@ -672,7 +672,6 @@ record LIST_CELL {
 	UInt32 Width;
 	UInt32 Height;
 	Group CellMargin {
-		# TODO: 방향 확정짓기
 		UInt16 Left;
 		UInt16 Right;
 		UInt16 Top;
@@ -817,7 +816,18 @@ record SHAPE_COMPONENT_RECTANGLE {
 
 # 4.2.9.2.4. 타원 개체
 record SHAPE_COMPONENT_ELLIPSE {
-	# TODO
+	Bits:4 {
+		0 Boolean IntervalDirty;
+		1 Boolean HasArcProperty;
+		2~9 enum ArcType: Int ArcType;
+	}
+	Int32 CenterX; Int32 CenterY;
+	Int32 Axis1X; Int32 Axis1Y;
+	Int32 Axis2X; Int32 Axis2Y;
+	Int32 Start1X; Int32 Start1Y;
+	Int32 End1X; Int32 End1Y;
+	Int32 Start2X; Int32 Start2Y;
+	Int32 End2X; Int32 End2Y;
 }
 
 # 4.2.9.2.5. 다각형 개체
@@ -856,6 +866,19 @@ record SHAPE_COMPONENT_CURVE {
 	# TODO_SOMETIME: 다각형 개체처럼 뒤에 뭐가 더 있음.
 }
 
+# LIST_HEADER가 앞에 있는 DRAWTEXT
+record LIST_DRAWTEXT {
+	Word _Unknown1;
+	Group TextMargin {
+		UInt16 Left;
+		UInt16 Right;
+		UInt16 Top;
+		UInt16 Bottom;
+	}
+	UInt32 LastWidth;
+	# TODO: 더 채워넣기
+}
+
 # 4.2.9.3. 한글 스크립트 수식 (한글 97 방식 수식)
 record EQEDIT {
 	Bits:4 {
@@ -884,7 +907,7 @@ record SHAPE_COMPONENT_OLE {
 	# TODO
 }
 
-# ???? TODO: 이것들 분류 찾기
+# ??? TODO: 이것들 분류 찾기
 record SHAPE_COMPONENT_TEXTART {
 	# TODO
 }

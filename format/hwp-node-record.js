@@ -26,7 +26,11 @@ var escapeHTML = function(s){
 	s += '';
 	for(var ps=false,h='',c,i=0; i<s.length; i++){
 		c = s.charCodeAt(i);
-		if((c<32||c>127)&&(c<44032||c>55203)) h += '&#'+c+';';
+		if(
+			(c<32||c>127) // ASCII
+			&&(c<12593||c>12643) // ㄱ-ㅎㅏ-ㅣ
+			&&(c<44032||c>55203) // 가-힣
+		) h += '&#'+c+';';
 		else if(s[i]==' '&&ps) h += '&#32;';
 		else if(s[i]=='"') h += '&quot;';
 		else if(s[i]=='&') h += '&amp;';

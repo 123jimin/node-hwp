@@ -9,11 +9,13 @@ var files = [
 	"text_2",
 	"text_3",
 	"table_simple_1",
+	"shape_text_1",
 	"shape_simple_1",
 	"shape_simple_2",
 	"shape_simple_3",
 	"shape_arrow_1",
 	"shape_fill_1",
+	"shape_fill_2",
 ];
 
 /*
@@ -24,7 +26,7 @@ var files = [
 		한/글이 CHAR를 잘 생성하지 못함. (특히 MARKPEN같은 Range들을 잘 처리 못 함.)
 	TODO:
 		기본 값 확인할 것 확인하기
-		PARAHEAD[Start], Cell[Name]에 대한 정보 찾기.
+		PARAHEAD[Start], CELL[Name], DRAWTEXT[Name. Editable]에 대한 정보 찾기.
 		COMPATIBLEDOCUMENT 채워넣기.
 		STARTNUMBER[Page] 다른 이유 확인하기.
 		NOTELINE[Length] 저장되는 형식 확인하기.
@@ -42,7 +44,7 @@ var ignores = {
 		'SECDEF': "TextVerticalWidthHead",
 		'PARALIST': "LinkListID LinkListIDNext",
 		// 아직 구현 안 된 것
-		'PARAHEAD': "Start", 'CELL': "Name",
+		'PARAHEAD': "Start", 'CELL': "Name", 'DRAWTEXT': "Name Editable",
 		'STARTNUMBER': "Page", 'NOTELINE': "Length",
 	},
 	'children': [
@@ -98,7 +100,7 @@ var check_file = function(file, callback){
 					rv = rv.replace(/\s/g, '');
 					break;
 			}
-			assert.equal(hml.getEncodedValue() || "", rv, "Different value");
+			assert.equal(hml.getEncodedValue() || "", rv.replace(/\r/g, "&#13;").replace(/\n/g, "&#10;"), "Different value");
 			assert.ok(hml.children.length <= ref.children.length, "HML too long");
 		}catch(e){
 			console.error("File '"+file+"': At "+check_stack.join(" > "));
