@@ -609,6 +609,12 @@ record CTRL_HEADER {
 				12 Boolean SameSize;
 			}
 			# TODO: 데이터 더 읽기. (다양한 경우에 대해 조사)
+		Case "pgnp":
+			Bits:4 {
+				0~7 enum NumberType1: Int FormatType;
+				8~11 enum PosType: Int Pos;
+			}
+			# TODO: 데이터 더 읽기. (최신 버전에 대해 조사)
 		Else:
 			{{ console.warn("Warning [CTRL_HEADER]: not processing Control Type '%s'", this.attr._Type); }}
 	}
