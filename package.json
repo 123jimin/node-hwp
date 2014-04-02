@@ -2,24 +2,24 @@
 	"name": "node-hwp",
 	"description": "HWP 5.0 library in Node.js",
 	"readme": "README.md",
-	"version": "0.0.1",
+	"version": "0.1.0-alpha",
 	"private": true,
-	"description": "A second attempt to make a node library for opening HWP documents",
 	"main": "./lib/hwp.js",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/123jimin/node-hwp.git"
 	},
 	"dependencies": {
-		"ole-doc": "*",
-		"xmldoc": "~0.1.2"
+		"ole-doc": "^0.1.0",
+		"xmldoc": "^0.1.2"
 	},
 	"devDependencies": {
-		"async": "~0.2.9",
-		"jison": "~0.4.13"
+		"async": "^0.2.9",
+		"jison": "^0.4.13"
 	},
 	"scripts": {
 		"prepublish": "jison format/format.jison -o format/format.js; node generate.js",
 		"test": "node test.js"
-	}
+	},
+	"license": "MIT",
 }
