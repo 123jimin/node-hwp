@@ -79,7 +79,7 @@ micro FillBrush {
 				Byte Alpha;
 			}
 		Else:
-			{{ console.warn("Warning [?>FillBrush]: not processing FillBrush Type '%s'", this.attr._BrushType); }}
+			{{ console.warn("Warning [?>FillBrush]: not processing FillBrush Type '%s'", attr._BrushType); }}
 	}
 }
 
@@ -116,9 +116,22 @@ record ID_MAPPINGS {
 	Int32 MemoCount;
 }
 
-# 4.1.3. 바이너리 데이터 (TODO: 문서 설명이 정확하지 않은 듯 함)
+# 4.1.3. 바이너리 데이터
 record BIN_DATA {
-	UInt16 Property;
+	Bits:2 {
+		0~3 enum BinItemType: Int Type;
+		# TODO: 이 두 개 HML로 옮길 수 있는지 확인하기
+		4~5 Int _Compress;
+		# TODO: DOC: 6~7 맞는지 확인하기
+		6~7 Int _AccessStatus;
+	}
+	Switch Type {
+		Cases "Embedding" "Storage":
+			UInt16 BinData;
+			WString Format;
+		Else:
+			{{ console.warn("Warning [BIN_DATA]: not processing BinItem type '%s'", attr.Type); }}
+	}
 }
 
 # 4.1.4. 글꼴
@@ -131,7 +144,7 @@ record FACE_NAME {
 		7 Boolean HasSubst;
 	}
 	WString Name;
-	{{ if(this.attr.HasSubst){ }}
+	{{ if(attr.HasSubst){ }}
 	Group SubstFont {
 		Bits:1 {
 			0~1 enum FontType: Int Type;
@@ -139,7 +152,7 @@ record FACE_NAME {
 		WString Name;
 	}
 	{{ } }}
-	{{ if(this.attr.HasShape){ }}
+	{{ if(attr.HasShape){ }}
 	Group TypeInfo {
 		Byte FamilyType;
 		Byte SerifStyle;
@@ -153,7 +166,7 @@ record FACE_NAME {
 		Byte XHeight;
 	}
 	{{ } }}
-	{{ if(this.attr.HasDefault){ }}
+	{{ if(attr.HasDefault){ }}
 	# TODO_SOMETIME: 이 곳 채워넣기
 	{{ } }}
 }
@@ -252,7 +265,7 @@ record TAB_DEF {
 	}
 	# TODO: count 자세히 확인
 	Int16 _count;
-	{{ if(this.attr._count){ }}
+	{{ if(attr._count){ }}
 	Group TabItem {
 		UInt32 Pos;
 		enum TabItemType: UInt8 Type;
@@ -383,23 +396,22 @@ record FORBIDDEN_CHAR {
 	UInt32 _f2_len;
 	UInt32 _f3_len;
 	{{
-		var _attr = this.attr, _data = this.data;
 		var read_str = function(len, label){
-			if(len == 0) _attr[label] = "\x20";
+			if(len == 0) attr[label] = "\x20";
 			else{
-				_attr[label] = "";
+				attr[label] = "";
 				while(len-->0){
-					_attr[label] += String.fromCharCode(
-						_data.readUInt16LE(offset.value)
+					attr[label] += String.fromCharCode(
+						data.readUInt16LE(offset.value)
 					);
 					offset.value += 2;
 				}
 			}
 		};
-		read_str(_attr._f0_len, "_f0");
-		read_str(_attr._f1_len, "_f1");
-		read_str(_attr._f2_len, "_f2");
-		read_str(_attr._f3_len, "_f3");
+		read_str(attr._f0_len, "_f0");
+		read_str(attr._f1_len, "_f1");
+		read_str(attr._f2_len, "_f2");
+		read_str(attr._f3_len, "_f3");
 	}}
 }
 
@@ -461,8 +473,8 @@ record PARA_TEXT {
 			buf = [];
 		}).bind(this);
 
-		for(i=0; i<this.data.length; i+=2){
-			c = this.data.readUInt16LE(i);
+		for(i=0; i<data.length; i+=2){
+			c = data.readUInt16LE(i);
 			/* in extended? */
 			if(tmp){
 				/* Is closing? */
@@ -501,10 +513,10 @@ record PARA_TEXT {
 record PARA_CHAR_SHAPE {
 	{{
 		this.values = [];
-		for(tmp=0; tmp<this.data.length; tmp+=8){
+		for(tmp=0; tmp<data.length; tmp+=8){
 			this.values.push({
-				'start': this.data.readUInt32LE(tmp),
-				'charShape': this.data.readUInt32LE(tmp+4)
+				'start': data.readUInt32LE(tmp),
+				'charShape': data.readUInt32LE(tmp+4)
 			});
 		};
 	}}
@@ -616,7 +628,7 @@ record CTRL_HEADER {
 			}
 			# TODO: 데이터 더 읽기. (최신 버전에 대해 조사)
 		Else:
-			{{ console.warn("Warning [CTRL_HEADER]: not processing Control Type '%s'", this.attr._Type); }}
+			{{ console.warn("Warning [CTRL_HEADER]: not processing Control Type '%s'", attr._Type); }}
 	}
 }
 
@@ -694,8 +706,8 @@ record SHAPE_COMPONENT {
 	4ChID _Type;
 	4ChID _Type2;
 	{{
-		this.attr._IsDup = this.attr._Type == this.attr._Type2;
-		if(!this.attr._IsDup) offset.value -= 4;
+		attr._IsDup = attr._Type == attr._Type2;
+		if(!attr._IsDup) offset.value -= 4;
 	}}
 	Int32 XPos;
 	Int32 YPos;
@@ -733,6 +745,7 @@ record SHAPE_COMPONENT {
 		}
 	}
 	Switch _Type {
+		Case "$ole": # 추가 데이터 없음
 		Case "$con":
 			Word _Count;
 			Array:_Count _CTypes
@@ -754,10 +767,10 @@ record SHAPE_COMPONENT {
 				}
 				{{
 					var adjustArrSize = function adjustArrSize(x){
-						if(this.attr.LineShape["_"+x+"Filled"]){
-							var v = this.attr.LineShape[x+"Style"];
+						if(attr.LineShape["_"+x+"Filled"]){
+							var v = attr.LineShape[x+"Style"];
 							if(v.slice(0,5) == "Empty"){
-								this.attr.LineShape[x+"Style"] = "Filled"+v.slice(5);
+								attr.LineShape[x+"Style"] = "Filled"+v.slice(5);
 							}
 						}
 					};
@@ -777,8 +790,8 @@ record SHAPE_COMPONENT {
 			Byte Shadow:Alpha;
 		Else:
 			{{
-				console.warn("Warning [SHAPE_COMPONENT]: not processing ShapeComponent Type '%s'", this.attr._Type);
-				console.warn("%s | %s", this.attr._Type, bufferToString(this.data.slice(offset.value)))
+				console.warn("Warning [SHAPE_COMPONENT]: not processing ShapeComponent Type '%s'", attr._Type);
+				console.warn("%s | %s", attr._Type, bufferToString(data.slice(offset.value)))
 			}}
 	}
 }
@@ -865,11 +878,11 @@ record SHAPE_COMPONENT_CURVE {
 	Array:_Count _Points {
 		Int32 _X; Int32 _Y;
 	}
-	{{ this.attr._Count--; }}
+	{{ attr._Count--; }}
 	Array:_Count _Types {
 		enum SegmentType: Byte value;
 	}
-	{{ this.attr._Count++; }}
+	{{ attr._Count++; }}
 	# TODO_SOMETIME: 다각형 개체처럼 뒤에 뭐가 더 있음.
 }
 
@@ -911,7 +924,26 @@ record SHAPE_COMPONENT_PICTURE {
 
 # 4.2.9.5. OLE 개체
 record SHAPE_COMPONENT_OLE {
-	# TODO
+	# DOC: 2바이트가 아니라 4바이트임
+	Bits:4 {
+		0~7 Int _DVASPECT;
+		8 Boolean HasMoniker;
+		# TODO: EqBaseLine: HML에서 어떻게 저장되는지 확인하기
+		9~15 Int EqBaseLine;
+		16~21 enum ObjetType: Int ObjetType;
+	}
+	{{
+		if(attr._DVASPECT & 1) attr.DrawAspect = "Content";
+		if(attr._DVASPECT & 2) attr.DrawAspect = "ThumbNail";
+		if(attr._DVASPECT & 4) attr.DrawAspect = "Icon";
+		if(attr._DVASPECT & 8) attr.DrawAspect = "DocPrint";
+	}}
+	Int32 ExtentX;
+	Int32 ExtentY;
+	UInt16 BinItem;
+	Group LineShape {
+		# TODO
+	}
 }
 
 # ??? TODO: 이것들 분류 찾기

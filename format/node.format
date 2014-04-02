@@ -85,6 +85,9 @@ enum FieldType {
 }
 
 # Implict enum
+enum BinItemType {
+	Link; Embedding; Storage;
+}
 enum FontType {
 	rep; ttf; hft;
 }
@@ -279,7 +282,7 @@ node BINDATALIST {
 	Int Count default="0";
 }
 node BINITEM {
-	String Type;
+	enum BinItemType Type;
 	String APath;
 	String RPath;
 	String BinData;
