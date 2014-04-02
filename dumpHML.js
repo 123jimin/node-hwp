@@ -5,7 +5,7 @@
 */
 
 var hwp = require('./');
-hwp.open("./test/files/"+(process.argv[2]||"")+".hwp", function(err, doc){
+hwp.open(process.argv[2]||"", function(err, doc){
 	if(err) console.error(err);
 	else console.log(doc.toHML(true));
 });
