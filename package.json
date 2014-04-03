@@ -21,5 +21,8 @@
 		"prepublish": "jison format/format.jison -o format/format.js; node generate.js",
 		"test": "node test.js"
 	},
+	"bin": {
+		"node-hwp": "./bin/node-hwp.js"
+	},
 	"license": "MIT"
 }

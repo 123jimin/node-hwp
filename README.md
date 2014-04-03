@@ -67,9 +67,9 @@ HWP 문서로부터 문서를 읽어왔다면, 이 속성에 그 문서의 메�
 HWP 문서를 HWPML형식으로 표현한 문자열을 반환합니다.
 
 ### `convertTo(converter)`
-`converter`의 `convert` 메소드에 HML 객체를 인자로 넣어 호출하고 결과를 반환합니다.
+`converter` 메소드에 HML 객체를 인자로 넣어 호출하고 결과를 반환합니다.
 
-예 `hwp.convertTo(new hwp.converter.PlainText)` (`hwp.converter`는 아직 없습니다.)
+예 `doc.convertTo(new hwp.converter.plainText)`
 
 __인자__
 
