@@ -113,6 +113,7 @@ record ID_MAPPINGS {
 	Int32 BulletCount;
 	Int32 ParaShapeCount;
 	Int32 StyleCount;
+	~
 	Int32 MemoCount;
 }
 
@@ -252,6 +253,7 @@ record CHAR_SHAPE{
 	ColorRef Underline:Color;
 	ColorRef ShadeColor;
 	ColorRef Shadow:Color;
+	~ # TODO: BorderFillId가 여기에 저장 안 될 때도 있는 것 같다.
 	UInt16 BorderFillId;
 	~
 	ColorRef Strikeout:Color;
@@ -565,8 +567,8 @@ record CTRL_HEADER {
 					24~25 enum TextFlowType: Int TextFlow;
 					26~28 enum NumberingType: Int NumberingType;
 				}
-				UInt32 Position:VertOffset;
-				UInt32 Position:HorzOffset;
+				Int32 Position:VertOffset;
+				Int32 Position:HorzOffset;
 				UInt32 Size:Width;
 				UInt32 Size:Height;
 				Int32 ZOrder;
@@ -575,15 +577,15 @@ record CTRL_HEADER {
 				UInt16 OutsideMargin:Top;
 				UInt16 OutsideMargin:Bottom;
 				UInt32 InstId;
+				~
 				# TODO_SOMETIME: 이 4 바이트의 정체는? (캡션 수?)
 				UInt32 _unknown;
 				~
 				WString ShapeComment:value;
 			}
 	}
-	# 주의: 위에서 이미 return되었을 수도 있음!
 	Switch _Type {
-		Cases "eqed" "tbl " "gso ": # 아무 데이터도 없음.
+		Cases "eqed" "tbl " "gso ": # 아무 데이터도 없음 / 이미 위에서 끝남
 		Case "secd":
 			# Section Definition
 			Group Hide;

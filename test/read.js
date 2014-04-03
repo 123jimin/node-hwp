@@ -5,10 +5,13 @@ var assert = require('assert'),
 var hwp = require('../');
 
 var files = [
+	// Simple texts
 	"text/text-1",
 	"text/text-2",
 	"text/text-3",
+	// Tables
 	"table/simple-1",
+	// Drawing Objects
 	"shape/text-1",
 	"shape/simple-1",
 	"shape/simple-2",
@@ -20,6 +23,9 @@ var files = [
 	"shape/fill-2",
 	"shape/group-1",
 	"shape/complex-1",
+	// KAIST forms
+	"kaist/kaist-055",
+	// Various Samples
 	"sample/sample-1",
 	"sample/sample-2",
 ];
@@ -40,6 +46,7 @@ var files = [
 */
 
 var ignores = {
+	// 다음 속성들을 무시
 	'attr': {
 		// 무시할 것
 		'PAGEBORDERFILL': "BorferFill",
@@ -53,8 +60,10 @@ var ignores = {
 		'PARAHEAD': "Start", 'CELL': "Name", 'DRAWTEXT': "Name Editable",
 		'STARTNUMBER': "Page", 'NOTELINE': "Length",
 	},
+	// 다음 노드의 자식들을 무시
 	'children': [
 	],
+	// 다음 노드들을 무시
 	'node': [
 		// 무시할 것
 		'CHAR',
@@ -62,6 +71,7 @@ var ignores = {
 		// 아직 구현 안 된 것
 		'TAIL'
 	],
+	// 다음 노드가 비어있으면 무시
 	'empty': [
 		'TEXT'
 	]
