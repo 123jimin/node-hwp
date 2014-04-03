@@ -4,7 +4,6 @@ var hwp = require('../'),
 	fs = require('fs');
 var argv = {
 	'_': [],
-	'convert': 'hml',
 	'debug': false,
 	'dump': false,
 };
@@ -41,12 +40,23 @@ process.argv.slice(2).forEach(function(e){
 
 hwp.HWP.debug = argv.debug;
 
-if(flag){
+if(argv._.length == 0){
+	console.log("Usage: ./node-hwp.js file.hwp");
+	console.log("\t-c, --convert format\n\t\tConvert given hwp file to the format (ex: hml, text)");
+	console.log("\t-o, --output file\n\t\tSave converted result to file");
+	console.log("\t-d, --dump\n\t\tDump record trees of the given hwp file");
+	console.log("\t--debug\n\t\tEnable debug messages");
+}else if(flag){
 	console.error("Error: missing argument to %s (%s)", flag_ori, flag);
-}else hwp.open(argv._[0], function(err, doc){
+}else hwp.open(argv._[0], {'type': 'hwp', 'saveTree': argv.debug || argv.dump}, function(err, doc){
 	if(err){
 		console.error(err);
 		return;
+	}
+	if(argv.dump){
+		console.log("===== DOCINFO =====");
+		console.log(doc._hwp5_records.docInfo.toString());
+		console.log("===== SECTION =====");
 	}
 	if(argv.convert){
 		var result = null;
