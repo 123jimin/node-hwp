@@ -24,7 +24,7 @@ var files = [
 	"shape/group-1",
 	"shape/complex-1",
 	// KAIST forms
-	"kaist/kaist-055",
+	// "kaist/kaist-055",
 	// Various Samples
 	"sample/sample-1",
 	"sample/sample-2",

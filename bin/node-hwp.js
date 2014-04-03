@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
-var hwp = require('../');
+var hwp = require('../'),
+	fs = require('fs');
 var argv = {
 	'_': [],
 	'convert': 'hml',
@@ -65,7 +66,7 @@ if(flag){
 				return;
 		}
 		if(argv.output){
-			
+			fs.writeFileSync(argv.output, result, 'utf-8');
 		}else{
 			console.log(result);
 		}
