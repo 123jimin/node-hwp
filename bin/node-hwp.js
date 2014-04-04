@@ -41,7 +41,7 @@ process.argv.slice(2).forEach(function(e){
 hwp.HWP.debug = argv.debug;
 
 if(argv._.length == 0){
-	console.log("Usage: ./node-hwp.js file.hwp");
+	console.log("Usage: ./node-hwp file.hwp");
 	console.log("\t-c, --convert format\n\t\tConvert given hwp file to the format (ex: hml, text)");
 	console.log("\t-o, --output file\n\t\tSave converted result to file");
 	console.log("\t-d, --dump\n\t\tDump record trees of the given hwp file");
@@ -53,32 +53,34 @@ if(argv._.length == 0){
 		console.error(err);
 		return;
 	}
+	var result = "";
 	if(argv.dump){
-		console.log("===== DOCINFO =====");
-		console.log(doc._hwp5_records.docInfo.toString());
-		console.log("===== SECTION =====");
+		result = "===== DOCINFO =====\n";
+		result += doc._hwp5_records.docInfo.toString()+"\n";
+		result += "===== SECTION =====\n";
+		result += doc._hwp5_records.sections.map(function(x){return x.toString()}).join('\n');
 	}
 	if(argv.convert){
-		var result = null;
+		if(result) result += "\n===== OUTPUT =====\n";
 		switch(argv.convert.toLowerCase()){
 			case 'hwpml':
 			case 'hml':
-				result = doc.toHML(argv.debug);
+				result += doc.toHML(argv.debug);
 				break;
 			case 'text':
 			case 'txt':
 			case 'plain':
 			case 'plaintext':
-				result = doc.convertTo(hwp.converter.plainText);
+				result += doc.convertTo(hwp.converter.plainText);
 				break;
 			default:
 				console.error("Error: convertTo format unknown: %s", argv.convert);
 				return;
 		}
-		if(argv.output){
-			fs.writeFileSync(argv.output, result, 'utf-8');
-		}else{
-			console.log(result);
-		}
+	}
+	if(argv.output){
+		fs.writeFileSync(argv.output, result, 'utf-8');
+	}else{
+		console.log(result);
 	}
 });
